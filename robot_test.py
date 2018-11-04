@@ -1,5 +1,5 @@
 import json
-import vizier.node as vizier_nod
+import vizier.node as vizier_node
 
 # Ensure that Node Descriptor File can be Opened
 node_descriptor = None
