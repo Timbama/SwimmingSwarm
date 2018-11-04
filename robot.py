@@ -1,11 +1,9 @@
 #socket_echo_server.py
 
-from __future__ import print_function
 from dronekit import connect
 
 import json
 import vizier.node as vizier_node
-import time
 
 
 def joystickToChannel(value):
@@ -46,17 +44,14 @@ print("Connecting to Controller")
 node.publish(publishable_link,"1")
 message = msg_queue.get(timeout = 10).decode(encoding='UTF-8')
 
-
 recieved = False
 
 while True:
     try:
         # Recieve Vizier Messages
         message = msg_queue.get(timeout = 1).decode(encoding='UTF-8')
-    
     except KeyboardInterrupt:
         break
-    
     except:
         if recieved:
             print("Connection to Controller Lost")
