@@ -4,7 +4,6 @@ from __future__ import print_function
 from dronekit import connect
 
 import json
-import random
 import vizier.node as vizier_node
 import time
 

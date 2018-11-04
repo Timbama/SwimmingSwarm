@@ -5,8 +5,8 @@
     "/input" :
     {
       "links" : {},
-      "type": "STREAM"
+      "type" : "STREAM"
     }
   },
-  "requests" : ["robot/state"]
+  "requests" : [{"link": "robot/state", "type": "STREAM", "required": false}]
 }
