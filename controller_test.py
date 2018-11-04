@@ -5,7 +5,7 @@ import vizier.node as vizier_node
 def main():
     # Parse Command Line Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("node_descriptor", help=".json file node information",
+    parser.add_argument("-node_descriptor", help=".json file node information",
                          default="node_desc_controller.json")
     parser.add_argument("-port", type=int, help="MQTT Port", default=8080)
     parser.add_argument("-host", help="MQTT Host IP", default="localhost")
