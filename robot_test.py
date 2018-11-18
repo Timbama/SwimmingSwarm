@@ -1,4 +1,3 @@
-
 import time
 import json
 import argparse
@@ -37,25 +36,24 @@ def main():
     msg_queue = node.subscribe(subscribable_link)
 
     # Set the initial condition
-    state = 10*random.random() - 5
-    dt = 0.0
+    state = 1
     node.publish(publishable_link, str(state))
-    print('\n')
-    while abs(state - 5) >= 0.001:
-        tick = time.time()
+    while state == 1:
+        input = [0,0,0,0]
         try:
             message = msg_queue.get(timeout=0.1).decode(encoding='UTF-8')
-            input = float(message)
+            input = message[1:-1].split(',')
+            yaw = float(input[0])
+            throttle = float(input[1])
+            depth_yaw = float(input[2])
+            depth = float(input[3])
         except KeyboardInterrupt:
             break
         except Exception:
-            input = 0.0
-        tock = time.time()
-        dt = tock - tick
-        state = state + dt * input
-        print('\t\t\t\t\t\tState = {}'.format(state), end='\r')
+            print("Connection Error")
+            state = 0
+        print('Command = {0},{1},{2},{3}'.format(int(yaw),int(throttle),int(depth_yaw),int(depth)), end='\r')
         node.publish(publishable_link, str(state))
-    print('\n')
     node.stop()
 
 

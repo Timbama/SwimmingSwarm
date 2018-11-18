@@ -2,6 +2,8 @@ import argparse
 import json
 import vizier.node as vizier_node
 
+import pyGui
+
 def main():
     # Parse Command Line Arguments
     parser = argparse.ArgumentParser()
@@ -32,26 +34,29 @@ def main():
     subscribable_link = list(node.subscribable_links)[0]
     msg_queue = node.subscribe(subscribable_link)
 
-    # Control stuffs
-    ref = 5.0
-    state = 1.0e6
-    print('\n')
-    while abs(ref - state) >= 0.001:
+    # Initializer GUI
+    gui = pyGui.Gui(True)
+    done = False
+
+    def communicate(callable):
         try:
             message = msg_queue.get(timeout=1).decode(encoding='UTF-8')
-            state = float(message)
+            state = int(message)
+            if (state == 0):
+                callable()
+            print('Control input = {}'.format(str(gui.get_joystick_axis()), end='\r'))
+            node.publish(publishable_link, str(gui.get_joystick_axis()))
         except KeyboardInterrupt:
-            break
+            callable()
         except Exception:
-            continue
-        print('Control input = {}'.format(ref-state), end='\r')
-        node.publish(publishable_link, str(ref-state))
-    print('\n')
+            pass
+
+    gui.start(communicate)
     node.stop()
 
 
 if(__name__ == "__main__"):
-main()
+    main()
 
 # #Initialize Connection
 # print("Connecting to Robot")
