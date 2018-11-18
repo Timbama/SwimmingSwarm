@@ -11,20 +11,22 @@ BLUE     = (   0,   0, 255)
 GREY     = (   160, 160,  160)
 
 class Gui:
-    def __init__(self):
+    def __init__(self, hasJoystick=True):
         # Initialize pygame and draw window
         pygame.font.init()
         pygame.init()
         size = (640, 480)
         self.screen = pygame.display.set_mode(size)
+        self.hasJoystick = hasJoystick
 
         # Used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
 
         # Initialize joysticks
-        pygame.joystick.init()
-        self.joystick = pygame.joystick.Joystick(0)
-        self.joystick.init()
+        if (self.hasJoystick):
+            pygame.joystick.init()
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
 
         # Not done yet
         self.done = False
@@ -82,23 +84,23 @@ class Gui:
         self.screen.blit(myfont.render('Depth', False, (0, 0, 0)),(570,10))
         
     def get_joystick_axis(self):
-        return (self.joystick.get_axis(0),
-                self.joystick.get_axis(1),
-                self.joystick.get_axis(2),
-                self.joystick.get_axis(3))
+        if (self.hasJoystick):
+            return (self.joystick.get_axis(0),
+                    self.joystick.get_axis(1),
+                    self.joystick.get_axis(2),
+                    self.joystick.get_axis(3))
+        else:
+            return (0,0,0,0)
 
     def render(self):
-        yaw1 = self.joystick.get_axis(0)
-        forward1 = self.joystick.get_axis(1)
-        yaw2 = self.joystick.get_axis(2)
-        throttle1 = self.joystick.get_axis(3)
+        (yaw, throttle, depth_yaw, depth) = self.get_joystick_axis()
 
         self.screen.fill(GREY)
-        self.draw_joystick(215, 210, yaw1, forward1)
-        self.draw_joystick(425, 210, yaw2, throttle1)
-        self.draw_throttle(20, 40, forward1, GREEN)
-        self.draw_throttle(600, 40, throttle1,RED)
-        self.draw_steering(120, 400, yaw1)
+        self.draw_joystick(215, 210, yaw, throttle)
+        self.draw_joystick(425, 210, depth_yaw, depth)
+        self.draw_throttle(20, 40, throttle, GREEN)
+        self.draw_throttle(600, 40, depth,RED)
+        self.draw_steering(120, 400, yaw)
         self.draw_labels()
 
         pygame.display.flip()
@@ -107,15 +109,18 @@ class Gui:
     
     def start(self, callable = None):
         while not self.done:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True
-            
-            # Calling function
-            if (callable != None):
-                callable(self.stop)
+            try:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        done = True
 
-            self.render()
+                # Calling function
+                if (callable != None):
+                    callable(self.stop)
+
+                self.render()
+            except KeyboardInterrupt:
+                break
         pygame.quit()
     
     def stop(self):
