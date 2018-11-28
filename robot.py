@@ -1,24 +1,49 @@
 #socket_echo_server.py
 
-from dronekit import connect
+from dronekit import connect, VehicleMode
 
+import argparse
 import json
 import vizier.node as vizier_node
+import time
 
 def main():
     # Parse Command Line Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-node_descriptor", help=".json file node information",
+    parser.add_argument("-node_descriptor", help=".json file node descriptor",
                         default="node_desc_robot.json")
     parser.add_argument("-port", type=int, help="MQTT Port", default=8080)
+    parser.add_argument("-connection_string", type=str, help="Pixhawk connection stirng",
+                        default="/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00")
     parser.add_argument("host", help="MQTT Host IP")
 
     args = parser.parse_args()
 
-    #PymavLink connection
-    connection_string = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
-    vehicle = connect(connection_string, wait_ready=True) #connect over mavlink
+    #Dronekit connection
+    print("Connecting to vehicle on: %s" % (args.connection_string,))
+    connected = False
+    while not connected:
+        try:
+            vehicle = connect(args.connection_string, wait_ready=True)
+            connected = True
+        except Exception as e:
+            print(e)
+            print("Retrying connection")
+
+    print("Waiting for vehicle to initialize...", end="")
+    while not vehicle.is_armable:
+        print(".", end="")
+        time.sleep(1)
+    print("\n")
+
+    print("Arming motors...")
+    vehicle.mode = VehicleMode("GUIDED")
     vehicle.armed = True
+    print("Waiting for arming...", end="")
+    while not vehicle.armed:
+        print(".", end="")
+        time.sleep(1)
+    print("\n")
 
     # Vizier connection
     # Ensure that Node Descriptor File can be Opened
@@ -53,29 +78,24 @@ def main():
             throttle = float(input[1])
             depth_yaw = float(input[2])
             depth = float(input[3])
-            commandMavLink(yaw, throttle, depth_yaw, depth)
+            #commandMavLink(vehicle, yaw, throttle, depth_yaw, depth)
         except KeyboardInterrupt:
-            break
-        except Exception:
-            print("Connection Error")
+            state = 0
+        except Exception as e:
+            print(e)
             state = 0
         node.publish(publishable_link, str(state))
-    
-    # Stop node and Pymavlink
+
+    # Stop node
+    print("Disconnecting...")
     node.stop()
+
+    # Stop vehicle
     vehicle.armed = False
-    vehicle.channels.overrides = {}
-
-def joystickToChannel(value):
-    #Channels range from 1200 to 1700 with 1500 being the center value
-    center = (1300 + 1700)/2
-    diff = (1700 - 1300)/2
-    return int(center + (diff * value))
-
-def commandMavLink(yaw, throttle, depth_yaw, depth):
-    #Send Commands over Mavlink
-    vehicle.channels.overrides = {'4': joystickToChannel(yaw), '5': joystickToChannel(throttle), '3': joystickToChannel(depth)}
-    print('Command = {0},{1},{2},{3}'.format(int(yaw),int(throttle),int(depth_yaw),int(depth)), end='\r')
+    while vehicle.armed:
+        print("Waiting for disarm...", end="\r")
+        time.sleep(1)
+    print("Disconnected")
 
 if (__name__ == "__main__"):
     main()
