@@ -11,6 +11,7 @@ def main():
                          default="node_desc_controller.json")
     parser.add_argument("-port", type=int, help="MQTT Port", default=8080)
     parser.add_argument("-host", help="MQTT Host IP", default="localhost")
+    parser.add_argument("-test", help="test mode, disable joystick", action="store_true")
 
     args = parser.parse_args()
 
@@ -35,7 +36,10 @@ def main():
     msg_queue = node.subscribe(subscribable_link)
 
     # Initializer GUI
-    gui = pyGui.Gui(True)
+    if (args.test):
+        gui = pyGui.Gui(False)
+    else:
+        gui = pyGui.Gui(True)
     done = False
 
     def communicate(callable):
@@ -44,12 +48,12 @@ def main():
             state = int(message)
             if (state == 0):
                 callable()
-            print('Control input = {}'.format(str(gui.get_joystick_axis()), end='\r'))
+            print('Control input = {} \r'.format(str(gui.get_joystick_axis()), end='\r'))
             node.publish(publishable_link, str(gui.get_joystick_axis()))
         except KeyboardInterrupt:
             callable()
-        except Exception:
-            pass
+        except Exception as e:
+            print(e, end='\r')
 
     gui.start(communicate)
     node.stop()
@@ -57,37 +61,3 @@ def main():
 
 if(__name__ == "__main__"):
     main()
-
-# #Initialize Connection
-# print("Connecting to Robot")
-
-# node.publish(publishable_link,"0,0,0")
-# state = 0
-
-# done = False
-# recieved = False
-
-# while not done:
-#     # Recieve data here
-#     try:
-#         #Recieve Vizier Messages
-#         message = msg_queue.get(timeout = 1).payload.decode(encoding='UTF-8')
-#         state = int(message)
-#     except:
-#         if recieved:
-#             node.publish(publishable_link,"0,0,0")
-#             break
-#         else:
-#             recieved = True
-#             state = 1
-
-#     if state != 1:
-#         #Robot sent back bad status
-#         print("Connection to robot lost")
-#         node.publish(publishable_link,"0,0,0")
-#         break
-
-#     #Send Vizier Message
-#     node.publish(publishable_link, "important stuff")
-
-# print("Exiting")
