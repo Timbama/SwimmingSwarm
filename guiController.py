@@ -1,6 +1,6 @@
 import json
 import numpy as np
-import vizier.node as vizier_node
+import vizier.node
 import pygame
 import math
 import time
@@ -18,7 +18,7 @@ except Exception as e:
     print("Couldn't open given node file node_desc_controller.json")
 
 # Start the Node
-node = vizier_node.Node("localhost", 1884, node_descriptor)
+node = vizier.node.Node("localhost", 1884, node_descriptor)
 node.start()
 
 # Get the links for Publishing/Subscribing
@@ -27,7 +27,7 @@ subscribable_link = list(node.subscribable_links)[0]
 msg_queue = node.subscribe(subscribable_link)
 
 # Initialize Gui
-gui = pyGui.Gui()
+gui = pyGui.Gui(False)
 
 def monitor_vizier(callable):
     # Recieve data here
