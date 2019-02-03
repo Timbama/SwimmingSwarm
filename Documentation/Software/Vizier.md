@@ -1,6 +1,6 @@
 # Installation
 1. Clone or download the [repository][1].
-2. Run the setup script from the vizier/python folder by running `sudo python3 setup.py install`
+2. Follow the installation instruction on the repository.
 3. Install Mosquitto by running `sudo apt-get install mosquitto`
 
 # Overview
@@ -41,8 +41,9 @@ This is the JSON description file for the robot node:
       "type" : "STREAM"
     }
   },
-  "requests" : ["controller/input"]
+  "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
 }
+
 ```
 `controller` is the name of the other node that it is connecting to and it can request the data labeled `input`.
 
@@ -63,7 +64,7 @@ This code loads the node description information from a JSON file and stores it 
 <br><br>
 Next, you need to start the Vizier Node.  
 ```python
-node = vizier_node.Node("localhost", 1884, node_descriptor)
+node = vizier.node.Node("localhost", 1884, node_descriptor)
 ```
 The first argument is the address that the MQTT Server is running at. The second argument is the port number. Finally, the third argument is the node description information pulled from the JSON file as shown earlier.  
 
