@@ -4,18 +4,18 @@ from dronekit import connect, VehicleMode
 
 import argparse
 import json
-import vizier.node as vizier_node
+import vizier.node
 import time
 
 def main():
     # Parse Command Line Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-node_descriptor", help=".json file node descriptor",
-                        default="node_desc_robot.json")
-    parser.add_argument("-port", type=int, help="MQTT Port", default=8080)
-    parser.add_argument("-connection_string", type=str, help="Pixhawk connection stirng",
-                        default="/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00")
-    parser.add_argument("host", help="MQTT Host IP")
+    parser.add_argument("-node_descriptor", help = ".json file node descriptor",
+                        default = "node_desc_robot.json")
+    parser.add_argument("-port", type = int, help = "MQTT Port", default = 8080)
+    parser.add_argument("-connection_string", type = str, help="Pixhawk connection stirng",
+                        default = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00")
+    parser.add_argument("host", help = "MQTT Host IP")
 
     args = parser.parse_args()
 
@@ -30,7 +30,7 @@ def main():
             print(e)
             print("Retrying connection")
 
-    print("Waiting for vehicle to initialize...", end="")
+    print("Waiting for vehicle to initialize...", end = "")
     while not vehicle.is_armable:
         print(".", end="")
         time.sleep(1)
@@ -56,7 +56,7 @@ def main():
         print(repr(e))
         print("Couldn't open given node file " + args.node_descriptor)
         return -1
-    node = vizier_node.Node(args.host, args.port, node_descriptor)
+    node = vizier.node.Node(args.host, args.port, node_descriptor)
     
     # Start the node
     node.start()
@@ -72,7 +72,7 @@ def main():
     while state == 1:
         input = [0,0,0,0]
         try:
-            message = msg_queue.get(timeout=0.1).decode(encoding='UTF-8')
+            message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8')
             input = message[1:-1].split(',')
             yaw = float(input[0])
             throttle = float(input[1])
@@ -93,7 +93,7 @@ def main():
     # Stop vehicle
     vehicle.armed = False
     while vehicle.armed:
-        print("Waiting for disarm...", end="\r")
+        print("Waiting for disarm...", end = "\r")
         time.sleep(1)
     print("Disconnected")
 

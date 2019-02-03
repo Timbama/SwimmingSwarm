@@ -5,19 +5,19 @@ from dronekit import connect, VehicleMode
 import argparse
 import dronekit_sitl
 import json
-import vizier.node as vizier_node
+import vizier.node
 import time
 
 def main():
     # Parse Command Line Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-node_descriptor", help=".json file node descriptor",
-                        default="node_desc_robot.json")
-    parser.add_argument("-port", type=int, help="MQTT Port", default=8080)
-    parser.add_argument("-connection_string", type=str, help="Pixhawk connection stirng",
-                        default="/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00")
-    parser.add_argument("-test", action="store_true")
-    parser.add_argument("host", help="MQTT Host IP")
+    parser.add_argument("-node_descriptor", help = ".json file node descriptor",
+                        default = "node_desc_robot.json")
+    parser.add_argument("-port", type = int, help = "MQTT Port", default = 8080)
+    parser.add_argument("-connection_string", type = str, help = "Pixhawk connection stirng",
+                        default = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00")
+    parser.add_argument("-test", action = "store_true")
+    parser.add_argument("host", help = "MQTT Host IP")
 
     args = parser.parse_args()
 
@@ -32,23 +32,23 @@ def main():
     connected = False
     while not connected:
         try:
-            vehicle = connect(connection_string, wait_ready=True)
+            vehicle = connect(connection_string, wait_ready = True)
             connected = True
         except Exception as e:
             print(e)
             print("Retrying connection")
-    print("Waiting for vehicle to initialize...", end="")
+    print("Waiting for vehicle to initialize...", end = "")
     while not vehicle.is_armable:
-        print(".", end="")
+        print(".", end = "")
         time.sleep(1)
     print("\n")
     
     print("Arming motors...")
     vehicle.mode = VehicleMode("GUIDED")
     vehicle.armed = True
-    print("Waiting for arming...", end="")
+    print("Waiting for arming...", end = "")
     while not vehicle.armed:
-        print(".", end="")
+        print(".", end = "")
         time.sleep(1)
     print("\n")
 
@@ -63,7 +63,7 @@ def main():
         print(repr(e))
         print("Couldn't open given node file " + args.node_descriptor)
         return -1
-    node = vizier_node.Node(args.host, args.port, node_descriptor)
+    node = vizier.node.Node(args.host, args.port, node_descriptor)
     
     # Start the node
     node.start()
@@ -79,13 +79,13 @@ def main():
     while state == 1:
         input = [0,0,0,0]
         try:
-            message = msg_queue.get(timeout=0.1).decode(encoding='UTF-8')
+            message = msg_queue.get(timeout = 0.1).decode(encoding = 'UTF-8')
             input = message[1:-1].split(',')
             yaw = float(input[0])
             throttle = float(input[1])
             depth_yaw = float(input[2])
             depth = float(input[3])
-            #commandMavLink(vehicle, yaw, throttle, depth_yaw, depth)
+            commandMavLink(vehicle, yaw, throttle, depth_yaw, depth)
         except KeyboardInterrupt:
             state = 0
         except Exception as e:
@@ -100,9 +100,9 @@ def main():
 
         #Stop vehicle
         vehicle.armed = False
-        print("Waiting for disarm...", end="")
+        print("Waiting for disarm...", end = "")
         while vehicle.armed:
-            print(".", end="")
+            print(".", end = "")
             time.sleep(1)
 
         # If it's a test, stop dronekit_sistl
@@ -122,11 +122,11 @@ def joystickToChannel(value):
     diff = (1700 - 1300)/2
     return int(center + (diff * value))
 
-# Overriding channel is discouraged and throws error, TODO: find alternate way
 def commandMavLink(vehicle, yaw, throttle, depth_yaw, depth):
-    #Send Commands over Mavlink
-    vehicle.channels.overrides = {'4': joystickToChannel(yaw), '5': joystickToChannel(throttle), '3': joystickToChannel(depth)}
-    print('Command = {0},{1},{2},{3}'.format(int(yaw),int(throttle),int(depth_yaw),int(depth)), end='\r')
+    # Send Commands over Mavlink
+    # Overriding channel is discouraged and throws error, TODO: find alternate way
+    #vehicle.channels.overrides = {'4': joystickToChannel(yaw), '5': joystickToChannel(throttle), '3': joystickToChannel(depth)}
+    print('Command = \t{0},\t{1},\t{2},\t{3}'.format(int(yaw),int(throttle),int(depth_yaw),int(depth)), end = "\r")
 
 # Example velocity control code on Dronekit
 def send_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
