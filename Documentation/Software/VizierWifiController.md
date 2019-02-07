@@ -9,5 +9,5 @@ quickly enough.
    * Topside Computer: `python3 guiController.py`
    * Raspberry Pi: `python3 robot.py`
 
-[1]: https://github.com/nthieu173/SwimmingSwarm/blob/04b4c606ec923ecefc45c05d37f08ebd242f9115/robot.py#L34
-[2]: https://github.com/nthieu173/SwimmingSwarm/blob/04b4c606ec923ecefc45c05d37f08ebd242f9115/guiController.py#L72
+[1]: https://github.com/nthieu173/SwimmingSwarm/blob/master/robot.py#L34
+[2]: https://github.com/nthieu173/SwimmingSwarm/blob/master/guiController.py#L72
