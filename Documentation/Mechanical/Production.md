@@ -25,7 +25,7 @@ Now you must assemble the thrusters. Insert the motor into the propeller and scr
 
 After all of that is done, the next step is to put in the ballast weight (possible weight inside the vehicle) and the electrical stack. Now connect the electrical stack to its respective places on the MT30 connector and connect the motor housings to their respective places on the bottom portion. Connect the thrusters to their spots on the MT30 connectors and screw the housing into the bottom portion. At this point, you should be done with the bottom portion. The next step is to insert the o-rings and put the top portion on the robot. Lastly, put the ballast trim weights on the bottom and close the cap. Screw in at least one of the holes on the cap so it does not rotate in water. 
 
-<img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/AboveHull.jpg?raw=true" alt="Bottom Portion" width="275"/> <img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/ThrusterConnection.jpg?raw=true" alt="Vertical Thruster Connection" width="275"/> <img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/BottomComponent.jpg?raw=true" alt="Bottom Locking Component" width="275"/>
+<img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/AboveHull.jpg?raw=true" alt="Bottom Portion" width="275"/> <img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/ThrusterConnection.jpg?raw=true" alt="Vertical Thruster Connection" width="275"/> <img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/BottomComponent.jpg?raw=true" alt="Bottom Locking Component" width="275"/>
 
  
 # O-Rings
@@ -33,7 +33,7 @@ To create a water seal between the top portion and the bottom portion, the team 
 
 After calculating the height of the groove, it is important to consider the width of the top and bottom of the groove. The bottom of the groove should be no smaller than the cross sectional diameter of the o-ring. The width of the top should be decided by calculating the cross sectional area of the o-ring and making sure it is wide enough to accommodate the entire o-ring. It is best to choose a width that makes the cross sectional area of the groove as close as possible to the actual cross sectional area of the o-ring, making sure that the cross sectional area of the groove is not smaller than that of the o-ring.  
 
-<img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/ORingDiagram.jpg?raw=true" alt="O-Ring Diagram" width="400"/>
+<img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/ORingDiagram.jpg?raw=true" alt="O-Ring Diagram" width="400"/>
 
 Above is the groove design for a 162 soft o-ring. The height of the groove is 1.7mm, allowing for a 20-21% compression ratio and a 1-2% stretch. The angle was chosen to make sure that the entirety of the compressed o-ring will fit in the groove. The bottom is 2.62mm which is the cross sectional diameter of the o-ring.
 
@@ -43,11 +43,11 @@ Above is the groove design for a 162 soft o-ring. The height of the groove is 1.
 There are certain components in this robot’s design where its purpose may not be immediately clear. This section is meant to mitigate that confusion and familiarize the user with the robot’s features.
 1.	Ballast: The robot has a place to put brass weights to balance out the robot. Each of these holes (shown by the blue arrow) have a spot for 1 inch brass weights. This was designed so one could place a brass weight with accuracy up to ½ the diameter of the weight. All the holes inside the ballast holes make sure the ballast area fills up with water (shown by the orange arrow). These holes are connected to the holes that outline the outside of the robot. The three small holes (designated by the yellow arrow) is where the cap would be screwed into the bottom portion to keep the cap from rotating underwater. 
 
-<img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/BottomPortionFromBottom.png?raw=true" alt="View from the bottom of the bottom portion" width="400"/>
+<img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/BottomPortionFromBottom.png?raw=true" alt="View from the bottom of the bottom portion" width="400"/>
 
 2.	Wireless charging and hexagonal insert: Looking at the bottom portion from the top shows a hexagonal hole leading into a circular hole (orange arrow). The hexagonal hole is meant to interface with the hexagonal extrusion from the electrical stack (see section on puttin the robot together for more information). This keeps the electrical stack stationary during use. The circular part is meant to fit a wireless charger in it so the robot does not have to be taken apart to charge. 
 
-<img src="https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Images/BottomPortionFromTop.jpg?raw=true" alt="View from the top of the bottom portion" width="300"/>
+<img src="https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Images/BottomPortionFromTop.jpg?raw=true" alt="View from the top of the bottom portion" width="300"/>
 
 [1]: https://www.marcorubber.com/o-ring-groove-design-considerations.htm
 

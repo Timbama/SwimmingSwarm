@@ -42,5 +42,5 @@ the display server back to Xorg.
 
 
 [1]: https://lowpowerlab.com/wp-content/uploads/2016/09/Pi3LoadTest_LowVoltage.jpg
-[2]: https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Troubleshooting.md#raspberry-pi-won't-connect-to-pixhawk
+[2]: https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Troubleshooting.md#raspberry-pi-won't-connect-to-pixhawk
 [3]: https://itsfoss.com/switch-xorg-wayland/

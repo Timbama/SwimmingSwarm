@@ -47,9 +47,9 @@ Then build Limesuite by following [this guide][8].
 
 [1]: https://www.raspberrypi.org/downloads/raspbian/
 [2]: https://etcher.io/
-[3]: https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Software/Vizier.md#installation
+[3]: https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Software/Vizier.md#installation
 [4]: https://github.com/pothosware/SoapySDR/wiki/BuildGuide
 [5]: https://osmocom.org/projects/gr-osmosdr/wiki#Build-process
 [6]: https://wiki.myriadrf.org/Lime_Suite#Ubuntu
-[7]: https://github.com/chachmu/SwimmingSwarm/blob/master/Documentation/Troubleshooting.md#raspberry-pi-freezes-when-trying-to-build-a-program
+[7]: https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Troubleshooting.md#raspberry-pi-freezes-when-trying-to-build-a-program
 [8]: https://wiki.myriadrf.org/Lime_Suite#Unix_makefiles
