@@ -6,6 +6,12 @@ import argparse
 import json
 import vizier.node
 import time
+import queue
+
+def commandMavLink(vehicle, yaw, throttle, pitch, depth):
+    vehicle.channels.overrides = {'1':2000, '2':500}
+    print("Right motor:", vehicle.channels["1"])
+    print("Left motor:", vehicle.channels["2"])
 
 def main():
     # Parse Command Line Arguments
@@ -30,20 +36,24 @@ def main():
             print(e)
             print("Retrying connection")
 
-    print("Waiting for vehicle to initialize...", end = "")
-    while not vehicle.is_armable:
-        print(".", end="")
-        time.sleep(1)
-    print("\n")
+    print("Vehicle current mode:", vehicle.mode.name)
 
     print("Arming motors...")
-    vehicle.mode = VehicleMode("GUIDED")
-    vehicle.armed = True
-    print("Waiting for arming...", end="")
-    while not vehicle.armed:
-        print(".", end="")
+    vehicle.mode = VehicleMode("MANUAL")
+    while not vehicle.mode.name == "MANUAL":
+        print("Waiting for mode change")
         time.sleep(1)
-    print("\n")
+
+    # print(vehicle.is_armable)
+    # while not vehicle.is_armable:
+    #     print("Waiting for vehicle to initialize")
+    #     time.sleep(1)
+
+    vehicle.armed = True
+    while not vehicle.armed:
+        print("Waiting for arming")
+        time.sleep(1)
+    print("Vehicle armed")
 
     # Vizier connection
     # Ensure that Node Descriptor File can be Opened
@@ -76,11 +86,13 @@ def main():
             input = message[1:-1].split(',')
             yaw = float(input[0])
             throttle = float(input[1])
-            depth_yaw = float(input[2])
+            pitch = float(input[2])
             depth = float(input[3])
-            #commandMavLink(vehicle, yaw, throttle, depth_yaw, depth)
+            commandMavLink(vehicle, yaw, throttle, pitch, depth)
         except KeyboardInterrupt:
             state = 0
+        except queue.Empty:
+            pass
         except Exception as e:
             print(e)
             state = 0
@@ -93,7 +105,7 @@ def main():
     # Stop vehicle
     vehicle.armed = False
     while vehicle.armed:
-        print("Waiting for disarm...", end = "\r")
+        print("Waiting for disarm")
         time.sleep(1)
     print("Disconnected")
 

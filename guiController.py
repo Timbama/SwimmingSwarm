@@ -1,6 +1,7 @@
 import argparse
 import json
 import vizier.node
+import queue
 
 import pyGui
 
@@ -12,6 +13,7 @@ def main():
     parser.add_argument("-port", type = int, help = "MQTT Port", default = 8080)
     parser.add_argument("-host", help = "MQTT Host IP", default = "localhost")
     parser.add_argument("-test", help = "test mode, disable joystick", action = "store_true")
+    parser.add_argument("-keyboard", help = "keyboard mode, used arrow keys", action="store_true")
 
     args = parser.parse_args()
 
@@ -36,7 +38,7 @@ def main():
     msg_queue = node.subscribe(subscribable_link)
 
     # Initializer GUI
-    if (args.test):
+    if (args.test or args.keyboard):
         gui = pyGui.Gui(False)
     else:
         gui = pyGui.Gui(True)
@@ -48,13 +50,19 @@ def main():
             state = int(message)
             if (state == 0):
                 callable()
-            joystick_axis =  gui.get_joystick_axis()
-            print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(joystick_axis[0],joystick_axis[1],joystick_axis[2],joystick_axis[3]), end = '\r')
-            node.publish(publishable_link, str(gui.get_joystick_axis()))
+            if not args.keyboard:
+                command =  gui.get_joystick_axis()
+            else:
+                command = gui.get_keyboard_command()
+            print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(command[0],command[1],command[2],command[3]), end = '\r')
+            node.publish(publishable_link, str(command))
         except KeyboardInterrupt:
             callable()
+        except queue.Empty:
+            pass
         except Exception as e:
-            print(e, end='\r')
+            print(e)
+            callable()
 
     gui.start(communicate)
     node.stop()
