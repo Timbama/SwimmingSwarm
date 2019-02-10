@@ -91,6 +91,17 @@ class Gui:
                     self.joystick.get_axis(3))
         else:
             return (0,0,0,0)
+    
+    def get_keyboard_command(self):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    return (-1,0,0,0)
+                elif event.key == pygame.K_RIGHT:
+                    return (1,0,0,0)
+        return (1,0,0,0)
+
 
     def render(self):
         (yaw, throttle, depth_yaw, depth) = self.get_joystick_axis()
