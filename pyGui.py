@@ -85,6 +85,7 @@ class Gui:
         
     def get_joystick_axis(self):
         if (self.hasJoystick):
+            
             return (self.joystick.get_axis(0),
                     self.joystick.get_axis(1),
                     self.joystick.get_axis(2),
@@ -93,18 +94,29 @@ class Gui:
             return (0,0,0,0)
     
     def get_keyboard_command(self):
+        commands = [0, 0, 0, 0]
         events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    return (-1,0,0,0)
-                elif event.key == pygame.K_RIGHT:
-                    return (1,0,0,0)
-        return (1,0,0,0)
+        keys = pygame.key.get_pressed()  #checking pressed keys
+        if keys[pygame.K_LEFT] & keys[pygame.K_RIGHT]:
+            commands[1] = -1
+        elif keys[pygame.K_LEFT]:
+            commands[0] = -1
+        elif keys[pygame.K_RIGHT]:
+            commands[0] = 1
+        elif keys[pygame.K_s]:
+            commands[1] = 1
+        if keys[pygame.K_UP]:
+            commands[3] = -1
+        elif keys[pygame.K_DOWN]:
+            commands[3] = 1
 
+        return commands
 
     def render(self):
-        (yaw, throttle, depth_yaw, depth) = self.get_joystick_axis()
+        if self.hasJoystick:
+            (yaw, throttle, depth_yaw, depth) = self.get_joystick_axis()
+        else:
+            (yaw, throttle, depth_yaw, depth) = self.get_keyboard_command()
 
         self.screen.fill(GREY)
         self.draw_joystick(215, 210, yaw, throttle)
@@ -123,7 +135,7 @@ class Gui:
             try:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        done = True
+                        self.done = True
 
                 # Calling function
                 if (callable != None):

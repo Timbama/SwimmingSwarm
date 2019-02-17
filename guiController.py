@@ -46,7 +46,7 @@ def main():
 
     def communicate(callable):
         try:
-            message = msg_queue.get(timeout=1).decode(encoding = 'UTF-8')
+            message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8')
             state = int(message)
             if (state == 0):
                 callable()
