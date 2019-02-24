@@ -97,18 +97,18 @@ class Gui:
         commands = [0, 0, 0, 0]
         events = pygame.event.get()
         keys = pygame.key.get_pressed()  #checking pressed keys
-        if keys[pygame.K_LEFT] & keys[pygame.K_RIGHT]:
+        if keys[pygame.K_LSHIFT]:
             commands[1] = -1
-        elif keys[pygame.K_LEFT]:
-            commands[0] = -1
-        elif keys[pygame.K_RIGHT]:
-            commands[0] = 1
-        elif keys[pygame.K_s]:
+        elif keys[pygame.K_LCTRL]:
             commands[1] = 1
-        if keys[pygame.K_UP]:
-            commands[3] = -1
-        elif keys[pygame.K_DOWN]:
+        if keys[pygame.K_e]:
             commands[3] = 1
+        elif keys[pygame.K_q]:
+            commands[3] = -1
+        if keys[pygame.K_a]:
+            commands[0] = -1
+        elif keys[pygame.K_d]:
+            commands[0] = 1
 
         return commands
 
