@@ -17,6 +17,7 @@
  *       AP_Motors6DOF.cpp - ArduSub motors library
  */
 
+#include <AP_BattMonitor/AP_BattMonitor.h>
 #include <AP_HAL/AP_HAL.h>
 #include "AP_Motors6DOF.h"
 
@@ -89,6 +90,34 @@ const AP_Param::GroupInfo AP_Motors6DOF::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("FV_CPLNG_K", 9, AP_Motors6DOF, _forwardVerticalCouplingFactor, 1.0),
 
+    // @Param: 9_DIRECTION
+    // @DisplayName: Motor normal or reverse
+    // @Description: Used to change motor rotation directions without changing wires
+    // @Values: 1:normal,-1:reverse
+    // @User: Standard
+    AP_GROUPINFO("9_DIRECTION", 10, AP_Motors6DOF, _motor_reverse[8], 1),
+
+    // @Param: 10_DIRECTION
+    // @DisplayName: Motor normal or reverse
+    // @Description: Used to change motor rotation directions without changing wires
+    // @Values: 1:normal,-1:reverse
+    // @User: Standard
+    AP_GROUPINFO("10_DIRECTION", 11, AP_Motors6DOF, _motor_reverse[9], 1),
+
+    // @Param: 11_DIRECTION
+    // @DisplayName: Motor normal or reverse
+    // @Description: Used to change motor rotation directions without changing wires
+    // @Values: 1:normal,-1:reverse
+    // @User: Standard
+    AP_GROUPINFO("11_DIRECTION", 12, AP_Motors6DOF, _motor_reverse[10], 1),
+
+    // @Param: 12_DIRECTION
+    // @DisplayName: Motor normal or reverse
+    // @Description: Used to change motor rotation directions without changing wires
+    // @Values: 1:normal,-1:reverse
+    // @User: Standard
+    AP_GROUPINFO("12_DIRECTION", 13, AP_Motors6DOF, _motor_reverse[11], 1),
+
     AP_GROUPEND
 };
 
@@ -143,13 +172,13 @@ void AP_Motors6DOF::setup_motors(motor_frame_class frame_class, motor_frame_type
         break;
 
     case SUB_FRAME_CUSTOM:
-	add_motor_raw_6dof(AP_MOTORS_MOT_1,     0,              0,              -1.0f,          0,                  1.0f,               0,              1);
-	add_motor_raw_6dof(AP_MOTORS_MOT_2,     0,              0,               1.0f,          0,                  1.0f,               0,              2);
+        add_motor_raw_6dof(AP_MOTORS_MOT_1,     0,              0,              -1.0f,          0,                  1.0f,               0,              1);
+        add_motor_raw_6dof(AP_MOTORS_MOT_2,     0,              0,               1.0f,          0,                  1.0f,               0,              2);
         add_motor_raw_6dof(AP_MOTORS_MOT_3,     -0.5f,          0.5f,           0,              0.45f,              0,                  0,              3);
         add_motor_raw_6dof(AP_MOTORS_MOT_4,     0.5f,           0.5f,           0,              0.45f,              0,                  0,              4);
         add_motor_raw_6dof(AP_MOTORS_MOT_5,     0.5f,           -0.5f,          0,              0.45f,              0,                  0,              5);
         add_motor_raw_6dof(AP_MOTORS_MOT_6,     -0.5f,          -0.5f,          0,              0.45f,              0,                  0,              6);
-	break;
+        break;
 
     case SUB_FRAME_SIMPLEROV_3:
     case SUB_FRAME_SIMPLEROV_4:
@@ -188,13 +217,11 @@ void AP_Motors6DOF::output_min()
 
     // fill the motor_out[] array for HIL use and send minimum value to each motor
     // ToDo find a field to store the minimum pwm instead of hard coding 1500
-    hal.rcout->cork();
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             rc_write(i, 1500);
         }
     }
-    hal.rcout->push();
 }
 
 int16_t AP_Motors6DOF::calc_thrust_to_pwm(float thrust_in) const
@@ -217,7 +244,7 @@ void AP_Motors6DOF::output_to_motors()
             }
         }
         break;
-    case SPIN_WHEN_ARMED:
+    case GROUND_IDLE:
         // sends output to motors when armed but not flying
         for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
             if (motor_enabled[i]) {
@@ -238,13 +265,11 @@ void AP_Motors6DOF::output_to_motors()
     }
 
     // send output to each motor
-    hal.rcout->cork();
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             rc_write(i, motor_out[i]);
         }
     }
-    hal.rcout->push();
 }
 
 float AP_Motors6DOF::get_current_limit_max_throttle()
@@ -325,13 +350,14 @@ void AP_Motors6DOF::output_armed_stabilizing()
         }
     }
 
+    const AP_BattMonitor &battery = AP::battery();
+
 	// Current limiting
-    if (_batt_current_max <= 0.0f) {
+    if (_batt_current_max <= 0.0f || !battery.has_current()) {
         return;
     }
 
-    static float _output_limited = 1.0f;
-    static float _batt_current_last = 0.0f;
+    float _batt_current = battery.current_amps();
 
     float _batt_current_delta = _batt_current - _batt_current_last;
 
@@ -416,7 +442,7 @@ void AP_Motors6DOF::output_armed_stabilizing_vectored()
     if (forward_coupling_limit < 0) {
         forward_coupling_limit = 0;
     }
-    int8_t forward_coupling_direction[] = {-1,-1,1,1,0,0,0,0};
+    int8_t forward_coupling_direction[] = {-1,-1,1,1,0,0,0,0,0,0,0,0};
 
     // calculate linear command for each motor
     // linear factors should be 0.0 or 1.0 for now
