@@ -1,15 +1,15 @@
-import argparse
 import json
 import vizier.node
 import queue
+from argparse import ArgumentParser
 
 import pyGui
 
 def main():
     # Parse Command Line Arguments
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("-node_descriptor", help = ".json file node information",
-                         default = "node_desc_controller.json")
+                        default = "node_desc_controller.json")
     parser.add_argument("-port", type = int, help = "MQTT Port", default = 8080)
     parser.add_argument("-host", help = "MQTT Host IP", default = "localhost")
     parser.add_argument("-test", help = "test mode, disable joystick", action = "store_true")
@@ -25,7 +25,7 @@ def main():
         f.close()
     except Exception as e:
         print(repr(e))
-        print("Couldn't open given node file " + args.node_descriptor)
+        print("Cannot open given node file " + args.node_descriptor)
         return -1
 
     # Start the Node

@@ -129,10 +129,11 @@ def commandMavLink(vehicle, yaw, throttle, depth_yaw, depth):
     print('Command = \t{0},\t{1},\t{2},\t{3}'.format(int(yaw),int(throttle),int(depth_yaw),int(depth)), end = "\r")
 
 # Example velocity control code on Dronekit
-def send_ned_velocity(velocity_x, velocity_y, velocity_z, duration):
+def send_ned_velocity(vehicle, velocity_x, velocity_y, velocity_z, duration):
     """
     Move vehicle in direction based on specified velocity vectors.
     """
+    from pymavlink import mavutil
     msg = vehicle.message_factory.set_position_target_local_ned_encode(
         0,       # time_boot_ms (not used)
         0, 0,    # target system, target component
