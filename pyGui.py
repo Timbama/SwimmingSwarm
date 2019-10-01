@@ -130,16 +130,12 @@ class Gui:
 
         self.clock.tick(60)
     
-    def start(self, callable = None):
+    def start(self):
         while not self.done:
             try:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.done = True
-
-                # Calling function
-                if (callable != None):
-                    callable(self.stop)
 
                 self.render()
             except KeyboardInterrupt:

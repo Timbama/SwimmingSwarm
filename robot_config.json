@@ -1,0 +1,15 @@
+{
+    "device_id": "usb-ArduPilot_Pixhawk1_25003C000E51373339363131-if00",
+    "node": {
+        "end_point" : "robot",
+        "links" :
+        {
+            "/state" :
+            {
+            "links" : {},
+            "type" : "STREAM"
+            }
+        },
+        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+    }
+}

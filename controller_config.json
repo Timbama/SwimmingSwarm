@@ -3,8 +3,7 @@
         "port": 8080,
         "node": {
             "end_point" : "controller",
-            "links" :
-            {
+            "links" : {
                 "/input" :
                 {
                 "links" : {},
@@ -18,9 +17,16 @@
         {
             "mac": "b8:27:eb:ae:65:e0",
             "username": "pi",
-            "password": "SwimmingSwarm",
-            "device": "usb-ArduPilot_Pixhawk1_25003C000E51373339363131-if00",
-            "script": "/home/pi/SwimmingSwarm/robot.py"
+            "password": "swimmingswarm",
+            "config": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot_config.json",
+                "dest": "/home/pi/SwimmingSwarm/robot_config.json"
+            },
+            "script": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot.py",
+                "dest": "/home/pi/SwimmingSwarm/robot.py"
+            },
+            "update_mode": "always"
         }
     ]
 }

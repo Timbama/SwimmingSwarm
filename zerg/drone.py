@@ -4,40 +4,42 @@ import queue
 from dronekit import connect, VehicleMode
 from pymavlink import mavutil
 
-class SwarmBot:
+class Drone:
     def __init__(self, connection_string: str, host: str, port: int,
                  node_descriptor: object,
                  vehicle_mode: str = "STABILIZE", verbose: bool = False):
-        self.__verbose__ = verbose
-        self.__event__ = {"armed": [], "disarmed": [], "connected": [], "disconnected": []}
-        self.__initializeNode__(host, port, node_descriptor)
-        self.__initializeVehicle__(connection_string)
+        self._verbose = verbose
+        self._event = {"armed": [], "connected":[], "disconnected":[], "disarmed": []}
+        self._initializeNode(host, port, node_descriptor)
+        self._initializeVehicle(connection_string)
         self.setVehicleMode(vehicle_mode)
         self.started = False
     
     def start(self):
         self.started = True
-        self.__arm_vehicle__()
-        self.__message_loop__()
+        self._arm_vehicle()
+        self._message_loop()
     
     def stop(self):
         if self.started:
             self.started = False
             self.node.stop()
-            self.__fire_event__("disconnected")
-            self.__disarm_vehicle__()
-        elif self.__verbose__: print("Vehicle not started")
+            self._fire_event("disconnected")
+            self._disarm_vehicle()
+        elif self._verbose: print("Vehicle not started")
 
-    def __message_loop__(self):
+    def _message_loop(self):
         """
         Start listening and responding to MQTT commands
         """
+        if self._verbose: print("Starting Vizier")
         self.node.start()
+        if self._verbose: print("Connected to Vizier")
         # Get the links for Publishing/Subscribing
         publishable_link = list(self.node.publishable_links)[0]
         subscribable_link = list(self.node.subscribable_links)[0]
         msg_queue = self.node.subscribe(subscribable_link)
-        self.__fire_event__("connected")
+        self._fire_event("connected")
 
         # Set the initial condition
         # 1 is good, 0 is stop
@@ -49,7 +51,8 @@ class SwarmBot:
             try:
                 # Receive and decode the message
                 message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8')
-                self.__execute__(message)
+                print(message)
+                self._execute(message)
             except KeyboardInterrupt:
                 # Stop when there's keyboard interrupt on the PI
                 state = 0
@@ -57,15 +60,15 @@ class SwarmBot:
                 # Just continue if the queue is empty
                 continue
             except Exception as e:
-                if self.__verbose__: print(e)
+                if self._verbose: print(e)
                 # Stop when there's other exception
                 state = 0
-            
-            # Send the updated initial condition to the PC
-            self.node.publish(publishable_link, str(state))
+            finally:
+                # Always send the updated condition to the PC
+                self.node.publish(publishable_link, str(state))
         self.stop()
     
-    def __execute__(self, message: str):
+    def _execute(self, message: str):
         """
         Execute MQTT message
         """
@@ -74,60 +77,60 @@ class SwarmBot:
         throttle = float(input[1])
         pitch = float(input[2])
         depth = float(input[3])
-        self.__commandMavLink__(vehicle, yaw, throttle, pitch, depth)
+        self._commandMavLink(vehicle, yaw, throttle, pitch, depth)
 
         
-    def __initializeVehicle__(self, connection_string: str):
-        if self.__verbose__: print("Connecting to vehicle...")
+    def _initializeVehicle(self, connection_string: str):
+        if self._verbose: print("Connecting to vehicle...")
         connected = False
         while not connected:
             try:
                 self.vehicle = connect(connection_string, wait_ready=True)
                 connected = True
             except Exception as e:
-                if self.__verbose__:
+                if self._verbose:
                     print("Error:", e)
                     print("Retrying connection...")
             time.sleep(1)
     
     def setVehicleMode(self, new_mode: str):
-        if self.__verbose__: print("Switching mode from", self.vehicle.mode.name,
+        if self._verbose: print("Switching mode from", self.vehicle.mode.name,
                                                     "to", new_mode)
         self.vehicle.mode = VehicleMode(new_mode)
         while self.vehicle.mode.name != new_mode:
-            if self.__verbose__: print("Waiting for mode change...")
+            if self._verbose: print("Waiting for mode change...")
             time.sleep(1)
-        if self.__verbose__: print("Successfully set mode ", self.vehicle.mode.name)
+        if self._verbose: print("Successfully set mode ", self.vehicle.mode.name)
     
-    def __arm_vehicle__(self):
-        if self.__verbose__: print("Arming vehicle...")
+    def _arm_vehicle(self):
+        if self._verbose: print("Arming vehicle...")
         self.vehicle.armed = True
         while not self.vehicle.armed:
-            if self.__verbose__: print("Waiting for arming...")
+            if self._verbose: print("Waiting for arming...")
             time.sleep(1)
-        self.__fire_event__("armed")
-        if self.__verbose__: print("Vehicle armed")
+        self._fire_event("armed")
+        if self._verbose: print("Vehicle armed")
     
-    def __disarm_vehicle__(self):
-        if self.__verbose__: print("Disarming vehicle...")
+    def _disarm_vehicle(self):
+        if self._verbose: print("Disarming vehicle...")
         self.vehicle.armed = False
         while self.vehicle.armed:
-            if self.__verbose__: print("Waiting for disarm")
+            if self._verbose: print("Waiting for disarm")
             time.sleep(1)
-        if self.__verbose__: print("Vehicle disarmed")
+        if self._verbose: print("Vehicle disarmed")
                 
-    def __initializeNode__(self, host: str, port: int, node_descriptor):
+    def _initializeNode(self, host: str, port: int, node_descriptor: object):
         """
         Create a new Vizier connection Node
         """
-        if self.__verbose__: print("Setting up Vizier node...")
+        if self._verbose: print("Setting up Vizier node...")
         self.node = vizier.node.Node(host, port, node_descriptor)
 
-    def __commandMavLink__(self, yaw, throttle, pitch, depth):
+    def _commandMavLink(self, yaw, throttle, pitch, depth):
         # Does nothing with the input yet
         # TODO: Pass actual commands to the vehicle
         # self.vehicle.channels.overrides = {}
-        if self.__verbose__: print("Command", yaw, ",", throttle, ",", pitch, ",", depth)
+        if self._verbose: print("Command", yaw, ",", throttle, ",", pitch, ",", depth)
 
     # Example velocity control code on Dronekit
     def send_ned_velocity(self, velocity_x, velocity_y, velocity_z, duration):
@@ -150,15 +153,11 @@ class SwarmBot:
             time.sleep(1)
 
     def addEventListener(self, event_name: str, listener: callable):
-        # All events are expected to expect one return argument:
-        # the Swarmbot object itself
-        self.__event__[event_name].append(listener)
+        self._event[event_name].append(listener)
     
     def removeEventListeners(self, event_name: str):
-        self.__event__[event_name] = []
+        self._event[event_name] = []
     
-    def __fire_event__(self, event_name: str):
-        # All events are expected to expect one return argument:
-        # the Swarmbot object itself
-        for listener in self.__event__[event_name]:
-            listener(self)
+    def _fire_event(self, event_name: str, *args):
+        for listener in self._event[event_name]:
+            listener(*args)
