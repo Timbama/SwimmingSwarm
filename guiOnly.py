@@ -2,8 +2,9 @@
 
 import pyGui
 
-gui = pyGui.Gui()
+gui = pyGui.Gui(hasJoystick=False)
 
-gui.start()
+while True:
+    gui.render()
 
 pyGui.quit()

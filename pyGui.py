@@ -1,6 +1,9 @@
 import pygame
 import math
 
+pygame.font.init()
+pygame.init()
+
 # Define some colors
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
@@ -27,9 +30,6 @@ class Gui:
             pygame.joystick.init()
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
-
-        # Not done yet
-        self.done = False
 
     def draw_joystick(self, x, y, xv, yv):
         #Draws the Circular Joystick value indicator
@@ -95,16 +95,17 @@ class Gui:
     
     def get_keyboard_command(self):
         commands = [0, 0, 0, 0]
-        events = pygame.event.get()
         keys = pygame.key.get_pressed()  #checking pressed keys
         if keys[pygame.K_LSHIFT]:
             commands[1] = -1
         elif keys[pygame.K_LCTRL]:
             commands[1] = 1
+
         if keys[pygame.K_e]:
             commands[3] = 1
         elif keys[pygame.K_q]:
             commands[3] = -1
+
         if keys[pygame.K_a]:
             commands[0] = -1
         elif keys[pygame.K_d]:
@@ -130,17 +131,10 @@ class Gui:
 
         self.clock.tick(60)
     
-    def start(self):
-        while not self.done:
-            try:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.done = True
+    def hasQuit(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
 
-                self.render()
-            except KeyboardInterrupt:
-                break
-        pygame.quit()
-    
     def stop(self):
-        self.done = True
+        pygame.quit()
