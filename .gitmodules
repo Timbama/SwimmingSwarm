@@ -1,3 +1,0 @@
-[submodule "vizier"]
-	path = vizier
-	url = git@github.com:robotarium/vizier.git
