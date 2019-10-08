@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from zerg.drone import Drone
+from swarm.drone import Drone
 
 def main():
     # Parse Command Line Arguments
@@ -26,9 +26,20 @@ def main():
 
     connection_string = "/dev/serial/by-id/" + config["device_id"]
 
-    print(config["node"])
     bot = Drone(connection_string, args.host, args.port, config["node"], verbose = args.verbose)
+    bot.addEventListener("message", execute)
     bot.start()
+
+def execute(bot: Drone, message: str):
+    """
+    Execute MQTT message
+    """
+    command = message[1:-1].split(',')
+    pitch = int(command[0])
+    roll = int(command[1])
+    yaw = int(command[2])
+    speed = float(command[3])
+    bot.commandMavLink((pitch, roll, yaw), speed)
 
 if (__name__ == "__main__"):
     main()
