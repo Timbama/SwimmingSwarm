@@ -47,13 +47,6 @@ def uploadFiles(ssh_client: paramiko.SSHClient, paths: list):
         ftp_client.put(source, dest)
     ftp_client.close()
 
-def run_ssh(ssh_client: paramiko.SSHClient, script_location: str, host: str, port: int, script_config_location: str, output = "None"):
-    command = "python3 " + script_location + " -host " + host + " -port " + str(port) + " " + script_config_location
-    ssh_client.exec_command(command)
-    #data = _read_ssh_ouput(ssh_stdout, ssh_stderr, output)
-    #ssh_client.close()
-    #return data
-
 def _read_ssh_ouput(stdout, stderr, output):
     if output.lower() == "stdout":
         return stdout.read()
@@ -84,10 +77,6 @@ class Overlord:
             for bot in self.bots:
                 bot_ssh = connectBySSH(self._getBotIP(bot.mac), bot.username, bot.password)
                 update(bot, bot_ssh)
-                ssh_thread = threading.Thread(target=run_ssh, name="SSH Thread to " + bot.mac,
-                                          args=(bot_ssh, bot.script["dest"], self.host_ip, self.host.port, bot.config["dest"]))
-                ssh_thread.start()
-                #run_ssh(bot_ssh, bot.script["dest"], self.host_ip, self.host.port, bot.config["dest"])
 
             # Get the links for Publishing/Subscribing
             publishable_link = list(self.host_node.publishable_links)[0]
@@ -99,15 +88,14 @@ class Overlord:
                 try:
                     self._fire_event("loop")
                     msg_queue = self.host_node.subscribe(subscribable_link)
-                    message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8')
+                    message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8') or ""
                     self.host_node.publish(publishable_link, self._fire_event("message", message))
+                except KeyboardInterrupt:
+                    self.stop()
                 except queue.Empty:
                     pass
-                except KeyboardInterrupt:
-                    self._fire_event("stop")
-                    self.stop()
                 except Exception as e:
-                    self._fire_event("stop")
+                    print(e)
                     self.stop()
 
         finally:
@@ -115,6 +103,7 @@ class Overlord:
             self._stopMosquitto()
         
     def stop(self):
+        self._fire_event("stop")
         self.started = False
     
     def addEventListener(self, event_name: str, listener: callable):
