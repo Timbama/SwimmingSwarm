@@ -10,7 +10,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("-configuration", help = ".json configuration file",
                         default = "controller_config.json")
-    
+    parser.add_argument("-joystick", action = "store_true")
     args = parser.parse_args()
 
     # Ensure that Configuration File can be Opened
@@ -26,7 +26,7 @@ def main():
 
     # Initializer GUI with keyboard
     overlord = Overlord(configuration)
-    gui = pyGui.Gui(False)
+    gui = pyGui.Gui(hasJoystick = args.joystick)
 
     def communicate(message):
         if gui.hasQuit():
@@ -35,8 +35,12 @@ def main():
         else:
             state = int(message)
             if (state == 0):
-                callable()
-            command = gui.get_keyboard_command()
+                overlord.stop()
+            if (args.joystick):
+                command = gui.get_joystick_axis()
+            else:
+                command = gui.get_keyboard_command()
+            command = (int(-command[0]), int(-command[1]), int(-command[2]), int(-command[3]))
             print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(command[0],command[1],command[2],command[3]), end = '\r')
             return str(command)
 
