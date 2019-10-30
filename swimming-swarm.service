@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Swimming Swarm robot script after there's network access
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/pi/SwimmingSwarm/robot.py
+
+[Install]
+WantedBy=network-online.target

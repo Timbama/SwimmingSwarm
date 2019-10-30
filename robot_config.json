@@ -1,5 +1,7 @@
 {
-    "device_id": "usb-ArduPilot_Pixhawk1_25003C000E51373339363131-if00",
+    "host": null,
+    "port": 8080,
+    "device_id": "usb-ArduPilot_fmuv2_25003C000E51373339363131-if00",
     "node": {
         "end_point" : "robot",
         "links" :
