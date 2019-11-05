@@ -3,7 +3,6 @@ import queue
 import socket
 import vizier.node
 from dronekit import connect, VehicleMode
-from pymavlink import mavutil
 
 class Drone:
     def __init__(self, connection_string: str, host: str, port: int,
@@ -131,6 +130,7 @@ class Drone:
         while not connected:
             try:
                 self.vehicle = connect(connection_string, wait_ready=True)
+                self.vehicle.wait_ready(True)
                 connected = True
             except Exception as e:
                 if self._verbose:
@@ -153,14 +153,37 @@ class Drone:
             if self._verbose: print("Waiting for disarm...")
             time.sleep(1)
         if self._verbose: print("Vehicle disarmed")
-    
+
     def channelCommand(self, pitch: float, roll: float, yaw: float, throttle: float):
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Throttle, Ch 4=Yaw
         self.vehicle.channels.overrides[0] = roll
         self.vehicle.channels.overrides[1] = pitch
         self.vehicle.channels.overrides[2] = throttle
         self.vehicle.channels.overrides[3] = yaw
-    
+
     def stabilizedCommand(self, pitch: float, roll: float, yaw: float, speed: float):
         self.vehicle.gimbal.rotate(pitch, roll, yaw)
         self.vehicle.airspeed = speed
+    
+    def sendGPS(self, lat, lon, alt, eph = 65535, epv = 65535, vel = 65535, cog = 65535, satellites_visible = 255,
+        alt_ellipsoid = None, h_acc = None, v_acc = None, vel_acc = None, hdg_acc = None):
+        gps_fix_type = {
+            "no_gps": 0, "no_fix": 1, "2d_fix": 2, "3d_fix": 3,
+            "dgps": 4, "rtk_float": 5, "rtk_fixed": 6, "static": 7, "ppp": 8
+            }
+        msg = None
+        if (alt_ellipsoid == None and h_acc == None and v_acc == None and vel_acc == None and hdg_acc == None):
+            msg = self.vehicle.message_factory.gps_raw_int_encode(
+                int(time.time()),
+                gps_fix_type["2d_fix"],
+                lat, lon, alt, eph, epv, vel, cog, satellites_visible
+            )
+            vehicle.send_mavlink(msg)
+        else:
+            msg = self.vehicle.message_factory.gps_raw_int_encode(
+                int(time.time()),
+                gps_fix_type["2d_fix"],
+                lat, lon, alt, eph, epv, vel, cog, satellites_visible,
+                alt_ellipsoid, h_acc, v_acc, vel_acc, hdg_acc
+            )
+            vehicle.send_mavlink(msg)
