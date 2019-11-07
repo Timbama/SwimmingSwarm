@@ -165,25 +165,34 @@ class Drone:
         self.vehicle.gimbal.rotate(pitch, roll, yaw)
         self.vehicle.airspeed = speed
     
-    def sendGPS(self, lat, lon, alt, eph = 65535, epv = 65535, vel = 65535, cog = 65535, satellites_visible = 255,
-        alt_ellipsoid = None, h_acc = None, v_acc = None, vel_acc = None, hdg_acc = None):
+    def sendGPS(self, lat: float, lon: float, alt: int, eph = 65535, epv = 65535, vel = 65535, cog = 65535, satellites_visible = 255):
+        ignore_flag = {
+            "alt": 1, "hdop": 2, "vdop": 4, "vel_horiz": 8, "vel_vert": 16,
+            "speed_accuracy": 32, "horizontal_accuracy": 64, "vertical_accuracy": 128
+        }
         gps_fix_type = {
-            "no_gps": 0, "no_fix": 1, "2d_fix": 2, "3d_fix": 3,
-            "dgps": 4, "rtk_float": 5, "rtk_fixed": 6, "static": 7, "ppp": 8
+            "no_fix": 0, "2d_fix": 2,
+            "3d_fix": 3, "dgps": 4, "rtk_float": 5
             }
-        msg = None
-        if (alt_ellipsoid == None and h_acc == None and v_acc == None and vel_acc == None and hdg_acc == None):
-            msg = self.vehicle.message_factory.gps_raw_int_encode(
-                int(time.time()),
-                gps_fix_type["2d_fix"],
-                lat, lon, alt, eph, epv, vel, cog, satellites_visible
-            )
-            vehicle.send_mavlink(msg)
-        else:
-            msg = self.vehicle.message_factory.gps_raw_int_encode(
-                int(time.time()),
-                gps_fix_type["2d_fix"],
-                lat, lon, alt, eph, epv, vel, cog, satellites_visible,
-                alt_ellipsoid, h_acc, v_acc, vel_acc, hdg_acc
-            )
-            vehicle.send_mavlink(msg)
+        gps_input_ignore_flags = ignore_flag["vel_horiz"] | ignore_flag["vel_vert"] | ignore_flag["speed_accuracy"]
+        msg = self.vehicle.message_factory.gps_input_encode(
+            time.time(),            #Timestamp (micros since boot or Unix epoch)
+            0,                      #ID of the GPS for multiple GPS inputs
+            gps_input_ignore_flags, #Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
+            0,                      #GPS time (milliseconds from start of GPS week)
+            0,                      #GPS week number
+            gps_fix_type["3d_fix"], #0-1: no fix, 2: 2D fix, 3: 3D fix. 4: 3D with DGPS. 5: 3D with RTK
+            int(lat * (10**7)),     #Latitude (WGS84), in degrees * 1E7
+            int(lon * (10**7)),     #Longitude (WGS84), in degrees * 1E7
+            alt,                    #Altitude (AMSL, not WGS84), in m (positive for up)
+            eph,                    #GPS HDOP horizontal dilution of position in m
+            epv,                    #GPS VDOP vertical dilution of position in m
+            0,                      #GPS velocity in m/s in NORTH direction in earth-fixed NED frame
+            0,                      #GPS velocity in m/s in EAST direction in earth-fixed NED frame
+            0,                      #GPS velocity in m/s in DOWN direction in earth-fixed NED frame
+            0,                      #GPS speed accuracy in m/s
+            0,                      #GPS horizontal accuracy in m
+            0,                      #GPS vertical accuracy in m
+            satellites_visible      #Number of satellites visible.
+        )
+        vehicle.send_mavlink(msg)
