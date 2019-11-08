@@ -151,7 +151,7 @@ class Gui:
 
         self.clock.tick(60)
     
-    def hasQuit(self):
+    def has_quit(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True

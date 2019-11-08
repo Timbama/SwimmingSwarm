@@ -16,7 +16,7 @@ def update(bot, bot_ssh: paramiko.SSHClient):
             files_to_update.append((bot.config["source"], bot.config["dest"]))
         if not md5sum_equal(bot.script["source"], bot.script["dest"], bot_ssh):
             files_to_update.append((bot.script["source"], bot.script["dest"]))
-        uploadFiles(bot_ssh, files_to_update)
+        upload_files(bot_ssh, files_to_update)
     
     def never(bot, bot_ssh):
         pass
@@ -35,13 +35,13 @@ def md5sum_equal(source, dest, bot_ssh):
     else:
         return False
 
-def connectBySSH(ip: str, uname: str, passw: str):
+def connect_by_SSH(ip: str, uname: str, passw: str):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh_client.connect(ip, username = uname, password = passw)
     return ssh_client
 
-def uploadFiles(ssh_client: paramiko.SSHClient, paths: list):
+def upload_files(ssh_client: paramiko.SSHClient, paths: list):
     ftp_client=ssh_client.open_sftp()
     for source, dest in paths:
         ftp_client.put(source, dest)
@@ -63,7 +63,7 @@ class Overlord:
         self.bots = []
         for bot in config["bots"]:
             self.bots.append(namedtuple("Bot", bot.keys())(*bot.values()))
-        self.host_ip = self._getHostIP()
+        self.host_ip = self._get_host_IP()
         self.host_node = node.Node(self.host_ip, self.host.port, self.host.node)
         self.started = False
         self._event = {"start": [], "stop":[], "message": [], "loop": []}
@@ -71,11 +71,11 @@ class Overlord:
     
     def start(self):
         try:
-            self._startMosquitto()
+            self._start_mosquitto()
             self.host_node.start()
             bot_ssh = None
             for bot in self.bots:
-                bot_ssh = connectBySSH(self._getBotIP(bot.mac), bot.username, bot.password)
+                bot_ssh = connect_by_SSH(self._get_bot_IP(bot.mac), bot.username, bot.password)
                 update(bot, bot_ssh)
 
             # Get the links for Publishing/Subscribing
@@ -100,18 +100,18 @@ class Overlord:
 
         finally:
             self.host_node.stop()
-            self._stopMosquitto()
+            self._stop_mosquitto()
         
     def stop(self):
         self._fire_event("stop")
         self.started = False
     
-    def addEventListener(self, event_name: str, listener: callable):
+    def add_event_listener(self, event_name: str, listener: callable):
         # All events are expected to expect one return argument:
         # the Drone object itself
         self._event[event_name].append(listener)
     
-    def removeEventListeners(self, event_name: str):
+    def remove_event_listeners(self, event_name: str):
         self._event[event_name] = []
     
     def _fire_event(self, event_name: str, *args):
@@ -125,19 +125,19 @@ class Overlord:
         else:
             return data
     
-    def _startMosquitto(self):
+    def _start_mosquitto(self):
         command = ["mosquitto", "-p", str(self.host.port)]
         self.mosquitto = subprocess.Popen(command)
         time.sleep(1)
     
-    def _stopMosquitto(self):
+    def _stop_mosquitto(self):
         self.mosquitto.terminate()
         time.sleep(1)
 
-    def _getHostIP(self):
+    def _get_host_IP(self):
         return socket.gethostbyname(socket.gethostname())
 
-    def _getBotIP(self, mac: str):
+    def _get_bot_IP(self, mac: str):
         if (self._bot_ip == None):
             self._bot_ip = {}
             macs = []

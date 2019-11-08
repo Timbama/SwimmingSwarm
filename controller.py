@@ -29,7 +29,7 @@ def main():
     gui = pyGui.Gui(hasJoystick = args.joystick)
 
     def communicate(message):
-        if gui.hasQuit():
+        if gui.has_quit():
             overlord.stop()
             return ""
         else:
@@ -44,9 +44,9 @@ def main():
             print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(command[0],command[1],command[2],command[3]), end = '\r')
             return str(command)
 
-    overlord.addEventListener("message", communicate)
-    overlord.addEventListener("loop", gui.render)
-    overlord.addEventListener("stop", gui.stop)
+    overlord.add_event_listener("message", communicate)
+    overlord.add_event_listener("loop", gui.render)
+    overlord.add_event_listener("stop", gui.stop)
 
     overlord.start()
 

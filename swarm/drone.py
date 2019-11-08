@@ -10,18 +10,21 @@ class Drone:
                  local: bool = False, verbose: bool = False):
         self._verbose = verbose
         self._local = local
-        self._event = {"armed": [], "connected":[], "disconnected":[], "disarmed": [], "message": []}
+        self._event = {
+            "armed": [], "connected":[], "disconnected":[],
+            "disarmed": [], "message": [], "loop": []
+            }
         if not local:
-            self._initNode(host, port, node_descriptor)
-        self._initVehicle(connection_string)
-        self.setVehicleMode(vehicle_mode)
+            self._init_node(host, port, node_descriptor)
+        self._init_vehicle(connection_string)
+        self.set_vehicle_mode(vehicle_mode)
         self._initCommands()
         self.started = False
     
     def start(self):
         self.started = True
         if not self._local:
-            self._startNode()
+            self._start_node()
         self._arm_vehicle()
         self._message_loop()
     
@@ -67,6 +70,7 @@ class Drone:
                     # Stop when there's other exception
                     state = 0
                 finally:
+                    self._fire_event("loop", self)
                     # Always send the updated condition to the PC
                     self.node.publish(publishable_link, str(state))
         else:
@@ -83,7 +87,7 @@ class Drone:
 
         self.stop()
 
-    def setVehicleMode(self, new_mode: str):
+    def set_vehicle_mode(self, new_mode: str):
         if self._verbose: print("Switching mode from", self.vehicle.mode.name,
                                                     "to", new_mode)
         self.vehicle.mode = VehicleMode(new_mode)
@@ -92,24 +96,24 @@ class Drone:
             time.sleep(1)
         if self._verbose: print("Successfully set mode ", self.vehicle.mode.name)
 
-    def addEventListener(self, event_name: str, listener: callable):
+    def add_event_listener(self, event_name: str, listener: callable):
         self._event[event_name].append(listener)
  
-    def removeEventListeners(self, event_name: str):
+    def remove_event_listeners(self, event_name: str):
         self._event[event_name] = []
     
     def _fire_event(self, event_name: str, *args):
         for listener in self._event[event_name]:
             listener(*args)
                 
-    def _initNode(self, host: str, port: int, node_descriptor: object):
+    def _init_node(self, host: str, port: int, node_descriptor: object):
         """
         Create a new Vizier connection Node
         """
         if self._verbose: print("Setting up Vizier node...")
         self.node = vizier.node.Node(host, port, node_descriptor)
     
-    def _startNode(self):
+    def _start_node(self):
         if self._verbose: print("Starting Vizier")
         connected = False
         while not connected:
@@ -124,7 +128,7 @@ class Drone:
                 time.sleep(1)
         if self._verbose: print("Connected to Vizier")
 
-    def _initVehicle(self, connection_string: str):
+    def _init_vehicle(self, connection_string: str):
         if self._verbose: print("Connecting to vehicle")
         connected = False
         while not connected:
@@ -154,18 +158,18 @@ class Drone:
             time.sleep(1)
         if self._verbose: print("Vehicle disarmed")
 
-    def channelCommand(self, pitch: float, roll: float, yaw: float, throttle: float):
+    def channel_command(self, pitch: float, roll: float, yaw: float, throttle: float):
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Throttle, Ch 4=Yaw
         self.vehicle.channels.overrides[0] = roll
         self.vehicle.channels.overrides[1] = pitch
         self.vehicle.channels.overrides[2] = throttle
         self.vehicle.channels.overrides[3] = yaw
 
-    def stabilizedCommand(self, pitch: float, roll: float, yaw: float, speed: float):
+    def stabilized_command(self, pitch: float, roll: float, yaw: float, speed: float):
         self.vehicle.gimbal.rotate(pitch, roll, yaw)
         self.vehicle.airspeed = speed
     
-    def sendGPS(self, lat: float, lon: float, alt: int, eph = 65535, epv = 65535, vel = 65535, cog = 65535, satellites_visible = 255):
+    def send_GPS(self, lat: float, lon: float, alt: float, hdop: float, vdop: float, vn: float):
         ignore_flag = {
             "alt": 1, "hdop": 2, "vdop": 4, "vel_horiz": 8, "vel_vert": 16,
             "speed_accuracy": 32, "horizontal_accuracy": 64, "vertical_accuracy": 128
@@ -185,14 +189,14 @@ class Drone:
             int(lat * (10**7)),     #Latitude (WGS84), in degrees * 1E7
             int(lon * (10**7)),     #Longitude (WGS84), in degrees * 1E7
             alt,                    #Altitude (AMSL, not WGS84), in m (positive for up)
-            eph,                    #GPS HDOP horizontal dilution of position in m
-            epv,                    #GPS VDOP vertical dilution of position in m
+            hdop,                   #GPS HDOP horizontal dilution of position in m
+            vdop,                   #GPS VDOP vertical dilution of position in m
             0,                      #GPS velocity in m/s in NORTH direction in earth-fixed NED frame
             0,                      #GPS velocity in m/s in EAST direction in earth-fixed NED frame
             0,                      #GPS velocity in m/s in DOWN direction in earth-fixed NED frame
             0,                      #GPS speed accuracy in m/s
             0,                      #GPS horizontal accuracy in m
             0,                      #GPS vertical accuracy in m
-            satellites_visible      #Number of satellites visible.
+            2                       #Number of satellites visible.
         )
-        vehicle.send_mavlink(msg)
+        self.vehicle.send_mavlink(msg)
