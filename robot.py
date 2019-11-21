@@ -35,23 +35,29 @@ def main():
 
     bot = Drone(connection_string, host, port, config["node"], local = args.local, verbose = args.verbose)
     if not args.local:
-        bot.addEventListener("message", execute)
+        bot.add_event_listener("message", execute)
     else:
-        bot.addEventListener("message", test)
+        bot.add_event_listener("message", test)
     bot.start()
 
 def execute(bot: Drone, message: str):
     """
     Execute MQTT message
     """
-    command = message[1:-1].split(',')
-    pitch = int(command[0])
-    roll = int(command[1])
-    yaw = int(command[2])
-    speed = int(command[3])
-    #bot.stabilizedCommand(pitch, roll, yaw, speed)
-    bot.channelCommand(pitch, roll, yaw, throttle = speed)
-
+    if bot.vehicle.mode.name == "STABLIZE":
+        command = json.loads(message)["command"]
+        pitch = int(command[0])
+        roll = int(command[1])
+        yaw = int(command[2])
+        speed = int(command[3])
+        #bot.stabilized_command(pitch, roll, yaw, speed)
+        bot.channel_command(pitch, roll, yaw, throttle = speed)
+    elif bot.vehicle.mode.name == "GUIDED":
+        command = json.loads(message)["command"]
+        lat = command["lat"]
+        lon = command["lon"]
+        #alt = command["alt"]
+        bot.guided_command(lat, lon)
 
 def test(bot: Drone, message: str == ""):
     """
