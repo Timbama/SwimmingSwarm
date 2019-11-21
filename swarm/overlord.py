@@ -66,7 +66,7 @@ class Overlord:
         self.host_ip = self._get_host_IP()
         self.host_node = node.Node(self.host_ip, self.host.port, self.host.node)
         self.started = False
-        self._event = {"start": [], "stop":[], "message": [], "loop": []}
+        self._event = {"start": [], "loop": [], "stop":[]}
         self._bot_ip = None
     
     def start(self):
@@ -79,17 +79,15 @@ class Overlord:
                 update(bot, bot_ssh)
 
             # Get the links for Publishing/Subscribing
-            publishable_link = list(self.host_node.publishable_links)[0]
-            subscribable_link = list(self.host_node.subscribable_links)[0]
+            self.publishable_link = list(self.host_node.publishable_links)[0]
+            self.subscribable_link = list(self.host_node.subscribable_links)[0]
 
+            self.msg_queue = self.host_node.subscribe(subscribable_link)
             self.started = True
             self._fire_event("start")
             while self.started:
                 try:
                     self._fire_event("loop")
-                    msg_queue = self.host_node.subscribe(subscribable_link)
-                    message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8') or ""
-                    self.host_node.publish(publishable_link, self._fire_event("message", message))
                 except KeyboardInterrupt:
                     self.stop()
                 except queue.Empty:
@@ -100,15 +98,23 @@ class Overlord:
 
         finally:
             self.host_node.stop()
+            self.publishable_link = None
+            self.subscribable_link = None
+            self.msg_queue = None
             self._stop_mosquitto()
         
     def stop(self):
         self._fire_event("stop")
         self.started = False
     
+    def publish(self, message):
+        self.host_node.publish(self.publishable_link, message)
+    
+    def get_message(self, block=True, timeout=None):
+        return self.msg_queue.get(block=block, timeout=timeout).decode(encoding = 'UTF-8') or ""
+
     def add_event_listener(self, event_name: str, listener: callable):
-        # All events are expected to expect one return argument:
-        # the Drone object itself
+        # All events expects nothing and return nothing. Control the object through public methods.
         self._event[event_name].append(listener)
     
     def remove_event_listeners(self, event_name: str):
