@@ -29,3 +29,6 @@ class MockGPS:
             self.lon += math.copysign(magnitude, self.target_lon - self.lon)
         else:
             self.lon = self.target_lon
+    
+    def encoded_coord(self):
+        return (int(self.lat * (10**7)), int(self.lon * (10**7)))
