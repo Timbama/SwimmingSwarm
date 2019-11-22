@@ -33,7 +33,10 @@ def main():
 
         def setup():
             setup_config = {"vehicle_mode": "STABILIZE"}
-            overlord.publish("TODO: MANUAL SETUP")
+            overlord.publish(json.dumps(setup_config, separators=(',',':')))
+            state = json.loads(overlord.get_message(timeout=1))
+            while "alive" not in state:
+                overlord.publish(json.dumps(setup_config, separators=(',',':')))
 
         def render_and_send_command():
             gui.render()
