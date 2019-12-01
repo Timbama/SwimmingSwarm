@@ -74,10 +74,10 @@ class Overlord:
         try:
             self._start_mosquitto()
             self.host_node.start()
-            bot_ssh = None
-            for bot in self.bots:
-                bot_ssh = connect_by_SSH(self._get_bot_IP(bot.mac), bot.username, bot.password)
-                update(bot, bot_ssh)
+            #bot_ssh = None
+            #for bot in self.bots:
+            #    bot_ssh = connect_by_SSH(self._get_bot_IP(bot.mac), bot.username, bot.password)
+            #    update(bot, bot_ssh)
 
             # Get the links for Publishing/Subscribing
             self.publishable_link = list(self.host_node.publishable_links)[0]
