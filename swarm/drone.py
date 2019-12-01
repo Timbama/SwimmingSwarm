@@ -31,23 +31,23 @@ class Drone:
         self.started = True
         if not self._local:
             self._start_node()
-        subscribable_link = list(self.node.subscribable_links)[0]
-        msg_queue = self.node.subscribe(subscribable_link)
-        received_setup_config = False
-        vehicle_mode = None
-        while not received_setup_config:
-            setup_message = msg_queue.get().decode(encoding = 'UTF-8')
-            setup_config = json.loads(setup_message)
-            if "vehicle_mode" in setup_config:
-                vehicle_mode = setup_config["vehicle_mode"]
-                received_setup_config = True
-            if "start_time" in setup_config:
-                self.start_time = setup_config["start_time"]
-            if "parameters" in setup_config:
-                for key in setup_config["parameters"]:
-                    self.vehicle.parameters[key] = setup_config["parameters"][key]
-            time.sleep(0.5)
-        self.set_vehicle_mode(vehicle_mode)
+            subscribable_link = list(self.node.subscribable_links)[0]
+            msg_queue = self.node.subscribe(subscribable_link)
+            received_setup_config = False
+            vehicle_mode = None
+            while not received_setup_config:
+                setup_message = msg_queue.get().decode(encoding = 'UTF-8')
+                setup_config = json.loads(setup_message)
+                if "vehicle_mode" in setup_config:
+                    vehicle_mode = setup_config["vehicle_mode"]
+                    received_setup_config = True
+                if "start_time" in setup_config:
+                    self.start_time = setup_config["start_time"]
+                if "parameters" in setup_config:
+                    for key in setup_config["parameters"]:
+                        self.vehicle.parameters[key] = setup_config["parameters"][key]
+                time.sleep(0.5)
+            self.set_vehicle_mode(vehicle_mode)
         self._arm_vehicle()
         self._message_loop()
     
@@ -183,6 +183,7 @@ class Drone:
         self.vehicle.armed = False
         while self.vehicle.armed:
             if self._verbose: print("Waiting for disarm...")
+            self.vehicle.armed = False
             time.sleep(1)
         if self._verbose: print("Vehicle disarmed")
 
@@ -192,11 +193,13 @@ class Drone:
             diff = (1700 - 1300)/2
             return int(center + (diff * value))
 
-        # Ch1 =Roll, Ch 2=Pitch, Ch 3=Throttle, Ch 4=Yaw
-        self.vehicle.channels.overrides[0] = pwm(roll)
-        self.vehicle.channels.overrides[1] = pwm(pitch)
-        self.vehicle.channels.overrides[2] = pwm(throttle)
-        self.vehicle.channels.overrides[3] = pwm(yaw)
+        if self._verbose: print(roll, pitch, throttle, yaw)
+        # Ch1 =Roll, Ch 2=Pitch, Ch 3=Horizontal throttle, Ch 4=Yaw, Ch 5=Forward throttle
+        self.vehicle.channels.overrides['1'] = pwm(roll)
+        self.vehicle.channels.overrides['2'] = pwm(pitch)
+        #self.vehicle.channels.overrides['3'] = pwm(throttle)
+        self.vehicle.channels.overrides['4'] = pwm(yaw)
+        self.vehicle.channels.overrides['5'] = pwm(throttle)
 
     def stabilized_command(self, pitch: float, roll: float, yaw: float, speed: float):
         self.vehicle.gimbal.rotate(pitch, roll, yaw)

@@ -63,7 +63,11 @@ def test(bot: Drone, message: str == ""):
     """
     Testing with empty message
     """
-    bot.commandMavLink((0,0,0), 100)
+    pitch = 0
+    roll = 0
+    yaw = 0
+    throttle = 1
+    bot.channel_command(pitch, roll, yaw, throttle)
 
 if (__name__ == "__main__"):
     main()
