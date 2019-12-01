@@ -64,6 +64,7 @@ class Overlord:
         for bot in config["bots"]:
             self.bots.append(namedtuple("Bot", bot.keys())(*bot.values()))
         self.host_ip = self._get_host_IP()
+        print("Host:", self.host_ip)
         self.host_node = node.Node(self.host_ip, self.host.port, self.host.node)
         self.started = False
         self._event = {"start": [], "loop": [], "stop":[]}
@@ -82,7 +83,7 @@ class Overlord:
             self.publishable_link = list(self.host_node.publishable_links)[0]
             self.subscribable_link = list(self.host_node.subscribable_links)[0]
 
-            self.msg_queue = self.host_node.subscribe(subscribable_link)
+            self.msg_queue = self.host_node.subscribe(self.subscribable_link)
             self.started = True
             self._fire_event("start")
             while self.started:
@@ -98,9 +99,6 @@ class Overlord:
 
         finally:
             self.host_node.stop()
-            self.publishable_link = None
-            self.subscribable_link = None
-            self.msg_queue = None
             self._stop_mosquitto()
         
     def stop(self):
@@ -141,7 +139,9 @@ class Overlord:
         time.sleep(1)
 
     def _get_host_IP(self):
-        return socket.gethostbyname(socket.gethostname())
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80)) #Connecting to Google and then getting whatever ip address was used
+        return s.getsockname()[0]
 
     def _get_bot_IP(self, mac: str):
         if (self._bot_ip == None):
