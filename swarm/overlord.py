@@ -159,4 +159,11 @@ class Overlord:
                     if bot_mac in line.decode():
                         self._bot_ip[bot_mac] = line.decode().rstrip().split()[0]
                         macs.remove(bot_mac)
-        return self._bot_ip[mac]
+        ip = ""
+        try:
+            ip = self._bot_ip[mac]
+            print("Found bot at:", ip)
+        except:
+            raise Exception("Bot not found on local network")
+
+        return ip
