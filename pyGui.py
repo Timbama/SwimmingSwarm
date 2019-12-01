@@ -30,7 +30,6 @@ class Gui:
         if (self.hasJoystick):
             pygame.joystick.init()
             self.joystick = pygame.joystick.Joystick(0)
-            print(self.joystick)
             self.joystick.init()
 
     def draw_joystick(self, x, y, xv, yv):

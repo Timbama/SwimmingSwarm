@@ -2,8 +2,6 @@ from argparse import ArgumentParser
 import json
 import pyGui
 from swarm.overlord import Overlord
-
-from vizier import node
 import time
 
 def main():
@@ -39,37 +37,35 @@ def main():
                 overlord.publish(json.dumps(setup_config, separators=(',',':')))
 
         def render_and_send_command():
+            if gui.has_quit():
+                overlord.stop()
+                return
             gui.render()
-            manual_command(overlord.get_message(timeout=1))
+            manual_command(overlord.get_message(timeout=0.1))
 
         def manual_command(message):
             def pwm(value):
                 center = (1300 + 1700)/2
                 diff = (1700 - 1300)/2
                 return int(center + (diff * value))
-
-            if gui.has_quit():
+            state = json.loads(message)
+            if (state["alive"] == False):
                 overlord.stop()
-                return ""
-            else:
-                state = json.loads(message)
-                if (state["alive"] == False):
-                    overlord.stop()
-                    gui.stop()
-                    return
-                if (args.mode == "joystick"):
-                    command = gui.get_joystick_axis()
-                elif (args.mode == "keyboard"):
-                    command = gui.get_keyboard_command()
-                command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
-                print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(command[0],command[1],command[2],command[3]), end = '\r')
-                state["command"] = command
-                overlord.publish(json.dumps(state, separators=(',',':')))
+                return
+            if (args.mode == "joystick"):
+                command = gui.get_joystick_axis()
+            elif (args.mode == "keyboard"):
+                command = gui.get_keyboard_command()
+            command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
+            state["command"] = command
+            print(state)
+            overlord.publish(json.dumps(state, separators=(',',':')))
         overlord.add_event_listener("loop", render_and_send_command)
         overlord.add_event_listener("stop", gui.stop)
     elif args.mode == "auto":
         start_time = 0
         def setup():
+            print("Staring setup")
             start_time = time.time()
             setup_config = {
                 "vehicle_mode": "GUIDED",
@@ -89,12 +85,16 @@ def main():
                 }
             }
             overlord.publish(json.dumps(setup_config, separators=(',',':')))
-            state = json.loads(overlord.get_message(timeout=1))
+            print("Published")
+            state = {}
+            print("Setting up",end="")
             while "alive" not in state:
                 start_time = time.time()
                 setup_config["start_time"]  = start_time
                 overlord.publish(setup_config)
                 state = json.loads(overlord.get_message(timeout=1))
+                print(".", end="")
+            print("")
         
         def auto_command():
             state = json.loads(overlord.get_message(timeout=1))
@@ -107,7 +107,9 @@ def main():
         overlord.add_event_listener("start", setup)
         overlord.add_event_listener("loop", auto_command)
 
+    print("Starting")
     overlord.start()
+    gui.stop()
 
 if(__name__ == "__main__"):
     main()

@@ -85,6 +85,7 @@ class Overlord:
 
             self.msg_queue = self.host_node.subscribe(self.subscribable_link)
             self.started = True
+            print("Starting")
             self._fire_event("start")
             while self.started:
                 try:
