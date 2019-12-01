@@ -63,10 +63,10 @@ def test(bot: Drone, message: str == ""):
     """
     Testing with empty message
     """
-    pitch = 0
-    roll = 0
-    yaw = 0
-    throttle = 1
+    pitch = 1700
+    roll = 1700
+    yaw = 1700
+    throttle = 1700
     bot.channel_command(pitch, roll, yaw, throttle)
 
 if (__name__ == "__main__"):

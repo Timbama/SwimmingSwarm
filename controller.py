@@ -43,6 +43,11 @@ def main():
             manual_command(overlord.get_message(timeout=1))
 
         def manual_command(message):
+            def pwm(value):
+                center = (1300 + 1700)/2
+                diff = (1700 - 1300)/2
+                return int(center + (diff * value))
+
             if gui.has_quit():
                 overlord.stop()
                 return ""
@@ -56,7 +61,7 @@ def main():
                     command = gui.get_joystick_axis()
                 elif (args.mode == "keyboard"):
                     command = gui.get_keyboard_command()
-                command = (int(-command[0]), int(-command[1]), int(-command[2]), int(-command[3]))
+                command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
                 print('Control input =\t{0},\t{1},\t{2},\t{3}'.format(command[0],command[1],command[2],command[3]), end = '\r')
                 state["command"] = command
                 overlord.publish(json.dumps(state, separators=(',',':')))

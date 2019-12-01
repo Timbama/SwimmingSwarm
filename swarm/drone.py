@@ -187,19 +187,14 @@ class Drone:
             time.sleep(1)
         if self._verbose: print("Vehicle disarmed")
 
-    def channel_command(self, pitch: float, roll: float, yaw: float, throttle: float):
-        def pwm(value):
-            center = (1300 + 1700)/2
-            diff = (1700 - 1300)/2
-            return int(center + (diff * value))
+    def channel_command(self, pitch: int, roll: int, yaw: int, throttle: int):
 
         if self._verbose: print(roll, pitch, throttle, yaw)
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Horizontal throttle, Ch 4=Yaw, Ch 5=Forward throttle
-        self.vehicle.channels.overrides['1'] = pwm(roll)
-        self.vehicle.channels.overrides['2'] = pwm(pitch)
-        #self.vehicle.channels.overrides['3'] = pwm(throttle)
-        self.vehicle.channels.overrides['4'] = pwm(yaw)
-        self.vehicle.channels.overrides['5'] = pwm(throttle)
+        self.vehicle.channels.overrides['1'] = roll
+        self.vehicle.channels.overrides['2'] = pitch
+        self.vehicle.channels.overrides['5'] = throttle
+        self.vehicle.channels.overrides['4'] = yaw
 
     def stabilized_command(self, pitch: float, roll: float, yaw: float, speed: float):
         self.vehicle.gimbal.rotate(pitch, roll, yaw)
