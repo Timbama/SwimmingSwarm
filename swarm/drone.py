@@ -148,12 +148,12 @@ class Drone:
             try:
                 # Probing broker
                 prober = socket.create_connection((self.node._host, self.node._port))
-                self.node.start()
                 connected = True
                 prober.close()
             except Exception as e:
                 print("Retrying:", e)
                 time.sleep(1)
+        self.node.start()
         if self._verbose: print("Connected to Vizier")
 
     def _init_vehicle(self, connection_string: str):
