@@ -1,7 +1,8 @@
 {
-    "host": null,
+    "host": "localhost",
     "port": 8080,
     "device_id": "usb-ArduPilot_fmuv2_25003C000E51373339363131-if00",
+    "vehicle_mode": "STABILIZED",
     "node": {
         "end_point" : "robot",
         "links" :

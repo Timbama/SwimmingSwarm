@@ -9,7 +9,7 @@ from swarm.gps import MockGPS
 
 class Drone:
     def __init__(self, connection_string: str, host: str, port: int,
-                 node_descriptor: dict, vehicle_mode = None,
+                 node_descriptor: dict, vehicle_mode: str,
                  local: bool = False, verbose: bool = False):
         self._verbose = verbose
         self._local = local
@@ -18,10 +18,27 @@ class Drone:
             "disarmed": [], "message": [], "loop": []
             }
         if not local:
-            self._init_node(host, port, node_descriptor)
-        if local and vehicle_mode != None:
-            self.set_vehicle_mode(vehicle_mode)
+            if self._verbose: print("Setting up Vizier node...")
+            self.node = vizier.node.Node(host, port, node_descriptor)
         self._init_vehicle(connection_string)
+        guided_parameters = {
+            "EK3_ENABLE": 1,
+            "EK2_ENABLE": 0,
+            "AHRS_EKF_TYPE": 3,
+            "EK3_GPS_TYPE": 0,
+            "EK3_MAG_CAL": 5,
+            "EK3_ALT_SOURCE": 2,
+            "GPS_TYPE": 14,
+            "GPS_DELAY_MS": 50,
+            "COMPASS_USE": 0,
+            "COMPASS_USE2": 0,
+            "COMPASS_USE3": 0
+        }
+        if vehicle_mode == "GUIDED":
+            for key in guided_parameters:
+                self.vehicle.parameters[key] = guided_parameters[key]
+        if self._verbose: print("Parameters", self.vehicle.parameters)
+        self._vehicle_mode = vehicle_mode
         self.started = False
 
         # TODO: Add actual GPS
@@ -29,25 +46,7 @@ class Drone:
     
     def start(self):
         self.started = True
-        if not self._local:
-            self._start_node()
-            subscribable_link = list(self.node.subscribable_links)[0]
-            msg_queue = self.node.subscribe(subscribable_link)
-            received_setup_config = False
-            vehicle_mode = None
-            while not received_setup_config:
-                setup_message = msg_queue.get().decode(encoding = 'UTF-8')
-                setup_config = json.loads(setup_message)
-                if "vehicle_mode" in setup_config:
-                    vehicle_mode = setup_config["vehicle_mode"]
-                    received_setup_config = True
-                if "start_time" in setup_config:
-                    self.start_time = setup_config["start_time"]
-                if "parameters" in setup_config:
-                    for key in setup_config["parameters"]:
-                        self.vehicle.parameters[key] = setup_config["parameters"][key]
-                time.sleep(0.5)
-            self.set_vehicle_mode(vehicle_mode)
+        self.set_vehicle_mode(self._vehicle_mode)
         self._arm_vehicle()
         self._message_loop()
     
@@ -64,17 +63,19 @@ class Drone:
         """
         Start listening and responding to MQTT commands
         """
-
         if not self._local:
+            self._start_node()
             publishable_link = list(self.node.publishable_links)[0]
             subscribable_link = list(self.node.subscribable_links)[0]
             msg_queue = self.node.subscribe(subscribable_link)
             self._fire_event("connected")
+            if self._verbose: print("Subscribed to broker")
         
-            state = {"alive": True, "time_shift": time.time() - self.start_time, "gps": self.gps.encoded_coord()}
+            state = {"alive": True, "gps": self.gps.encoded_coord()}
 
             # Send the initial condition to the PC
             self.node.publish(publishable_link, json.dumps(state, separators = (',', ':')))
+            if self._verbose: print("Sent initial state")
             while state["alive"] == True:
                 try:
                     # Receive and decode the message
@@ -97,7 +98,6 @@ class Drone:
                     self.gps.step(0.01)
 
                     # Update the state
-                    state["time_shift"] = time.time() - self.start_time
                     state["gps"] = self.gps.encoded_coord()
                     self._fire_event("loop", self)
                     # Always send the updated state to the PC
@@ -134,13 +134,6 @@ class Drone:
         for listener in self._event[event_name]:
             listener(*args)
                 
-    def _init_node(self, host: str, port: int, node_descriptor: object):
-        """
-        Create a new Vizier connection Node
-        """
-        if self._verbose: print("Setting up Vizier node...")
-        self.node = vizier.node.Node(host, port, node_descriptor)
-    
     def _start_node(self):
         if self._verbose: print("Starting Vizier")
         connected = False
@@ -188,7 +181,6 @@ class Drone:
         if self._verbose: print("Vehicle disarmed")
 
     def channel_command(self, pitch: int, roll: int, yaw: int, throttle: int):
-
         if self._verbose: print(roll, pitch, throttle, yaw)
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Horizontal throttle, Ch 4=Yaw, Ch 5=Forward throttle
         self.vehicle.channels.overrides['1'] = roll
@@ -196,7 +188,7 @@ class Drone:
         self.vehicle.channels.overrides['5'] = throttle
         self.vehicle.channels.overrides['4'] = yaw
 
-    def stabilized_command(self, pitch: float, roll: float, yaw: float, speed: float):
+    def stabilize_command(self, pitch: float, roll: float, yaw: float, speed: float):
         self.vehicle.gimbal.rotate(pitch, roll, yaw)
         self.vehicle.airspeed = speed
     

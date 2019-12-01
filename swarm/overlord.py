@@ -58,17 +58,18 @@ def _read_ssh_ouput(stdout, stderr, output):
         return None
 
 class Overlord:
-    def __init__(self, config: object):
+    def __init__(self, config: object, verbose: bool = False):
         self.host = namedtuple("Host", config["host"].keys())(*config["host"].values())
         self.bots = []
         for bot in config["bots"]:
             self.bots.append(namedtuple("Bot", bot.keys())(*bot.values()))
         self.host_ip = self._get_host_IP()
-        print("Host:", self.host_ip)
+        print("Host IP:", self.host_ip)
         self.host_node = node.Node(self.host_ip, self.host.port, self.host.node)
         self.started = False
         self._event = {"start": [], "loop": [], "stop":[]}
         self._bot_ip = None
+        self._verbose = verbose
     
     def start(self):
         try:
@@ -85,14 +86,15 @@ class Overlord:
 
             self.msg_queue = self.host_node.subscribe(self.subscribable_link)
             self.started = True
-            print("Starting")
             self._fire_event("start")
+            if self._verbose: print("Starting loop")
             while self.started:
                 try:
                     self._fire_event("loop")
                 except KeyboardInterrupt:
                     self.stop()
                 except queue.Empty:
+                    if self._verbose: print("Empty queue")
                     pass
                 except Exception as e:
                     print(e)
@@ -110,7 +112,7 @@ class Overlord:
         self.host_node.publish(self.publishable_link, message)
     
     def get_message(self, block=True, timeout=None):
-        return self.msg_queue.get(block=block, timeout=timeout).decode(encoding = 'UTF-8') or ""
+        return self.msg_queue.get(block=block, timeout=timeout).decode(encoding = 'UTF-8')
 
     def add_event_listener(self, event_name: str, listener: callable):
         # All events expects nothing and return nothing. Control the object through public methods.
@@ -163,7 +165,7 @@ class Overlord:
         ip = ""
         try:
             ip = self._bot_ip[mac]
-            print("Found bot at:", ip)
+            print("Bot IP:", ip)
         except:
             raise Exception("Bot not found on local network")
 

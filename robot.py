@@ -33,7 +33,7 @@ def main():
         port = config["port"]
     connection_string = "/dev/serial/by-id/" + config["device_id"]
 
-    bot = Drone(connection_string, host, port, config["node"], local = args.local, verbose = args.verbose)
+    bot = Drone(connection_string, host, port, config["node"], vehicle_mode=config["vehicle_mode"], local = args.local, verbose = args.verbose)
     if not args.local:
         bot.add_event_listener("message", execute)
     else:
@@ -50,7 +50,7 @@ def execute(bot: Drone, message: str):
         roll = int(command[1])
         yaw = int(command[2])
         speed = int(command[3])
-        #bot.stabilized_command(pitch, roll, yaw, speed)
+        #bot.stabilize_command(pitch, roll, yaw, speed)
         bot.channel_command(pitch, roll, yaw, throttle = speed)
     elif bot.vehicle.mode.name == "GUIDED":
         command = json.loads(message)["command"]
