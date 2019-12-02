@@ -53,6 +53,7 @@ def main():
             elif (args.mode == "keyboard"):
                 command = gui.get_keyboard_command()
             command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
+            print(command)
             state["command"] = command
             overlord.publish(json.dumps(state, separators=(',',':')))
 
