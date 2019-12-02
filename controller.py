@@ -75,7 +75,6 @@ def main():
             overlord.publish(json.dumps(state, separators=(',',':')))
         
         overlord.add_event_listener("loop", auto_command)
-        overlord.add_event_listener("stop", gui.stop)
     else:
         return
 

@@ -94,11 +94,16 @@ class Drone:
                     # Stop when there's other exception
                     state["alive"] =  False
                 finally:
-                    # TODO: Remove for actual GPS. Step the mock gps simlation.
-                    self.gps.step(0.01)
 
-                    # Update the state
-                    state["gps"] = self.gps.encoded_coord()
+                    if self.vehicle.mode.name == "GUIDED":
+                        # TODO: Remove for actual GPS. Step the mock gps simlation.
+                        self.gps.step(0.01)
+                        lat, lon = self.gps.encoded_coord()
+                        # Update the state
+                        state["gps"] = (lat, lon)
+                        # Send updated GPS
+                        self.send_GPS(lat, lon, alt=0)
+
                     self._fire_event("loop", self)
                     # Always send the updated state to the PC
                     self.node.publish(publishable_link, json.dumps(state, separators = (',', ':')))
@@ -195,7 +200,7 @@ class Drone:
     def guided_command(self, lat: float, lon: float, alt = 0):
         self.vehicle.simple_goto(LocationGlobal(lat, lon, alt))
     
-    def send_GPS(self, lat: float, lon: float, alt: float, satellites_visible = 2):
+    def send_GPS(self, lat: float, lon: float, alt: float, satellites_visible = 3):
         gps_fix_type = {
             "no_fix": 0, "2d_fix": 2,
             "3d_fix": 3, "dgps": 4, "rtk_float": 5
