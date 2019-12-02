@@ -98,11 +98,10 @@ class Drone:
                     if self.vehicle.mode.name == "GUIDED":
                         # TODO: Remove for actual GPS. Step the mock gps simlation.
                         self.gps.step(0.01)
-                        lat, lon = self.gps.encoded_coord()
                         # Update the state
-                        state["gps"] = (lat, lon)
+                        state["gps"] = self.gps.encoded_coord()
                         # Send updated GPS
-                        self.send_GPS(lat, lon, alt=0)
+                        self.send_GPS(self.gps.lat, self.gps.lon, alt=0)
 
                     self._fire_event("loop", self)
                     # Always send the updated state to the PC
@@ -127,8 +126,7 @@ class Drone:
         while self.vehicle.mode.name != new_mode:
             if self._verbose: print("Waiting for mode change...")
             if new_mode == "GUIDED":
-                lat, lon = self.gps.encoded_coord()
-                self.send_GPS(lat, lon, alt=0)
+                self.send_GPS(self.gps.lat, self.gps.lon, alt=0)
             time.sleep(1)
         if self._verbose: print("Successfully set mode ", self.vehicle.mode.name)
 
