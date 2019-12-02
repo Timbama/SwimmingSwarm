@@ -47,7 +47,7 @@ class Drone:
     def start(self):
         self.started = True
         self.set_vehicle_mode(self._vehicle_mode)
-        self._arm_vehicle()
+        self.arm_vehicle()
         self._message_loop()
     
     def stop(self):
@@ -56,7 +56,7 @@ class Drone:
             if not self._local:
                 self.node.stop()
                 self._fire_event("disconnected")
-            self._disarm_vehicle()
+            self.disarm_vehicle()
         elif self._verbose: print("Vehicle not started")
     
     def _message_loop(self):
@@ -169,7 +169,7 @@ class Drone:
                     print("Retrying:", e)
             time.sleep(1)
 
-    def _arm_vehicle(self):
+    def arm_vehicle(self):
         if self._verbose: print("Arming vehicle")
         self.vehicle.armed = True
         while not self.vehicle.armed:
@@ -178,7 +178,7 @@ class Drone:
         self._fire_event("armed")
         if self._verbose: print("Vehicle armed")
     
-    def _disarm_vehicle(self):
+    def disarm_vehicle(self):
         if self._verbose: print("Disarming vehicle")
         self.vehicle.armed = False
         while self.vehicle.armed:

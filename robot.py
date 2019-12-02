@@ -1,11 +1,11 @@
-import argparse
 import json
+from argparse import ArgumentParser
 
 from swarm.drone import Drone
 
 def main():
     # Parse Command Line Arguments
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("-host", type = str, help = "MQTT Host IP")
     parser.add_argument("-port", type = int, help = "MQTT Port")
     parser.add_argument("config", type = str, help = "Config file", nargs="?", default="./robot_config.json")
