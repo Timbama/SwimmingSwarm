@@ -194,11 +194,8 @@ class Drone:
         self.vehicle.channels.overrides['5'] = throttle
         self.vehicle.channels.overrides['4'] = yaw
 
-    def stabilize_command(self, pitch: float, roll: float, yaw: float, speed: float):
-        self.vehicle.gimbal.rotate(pitch, roll, yaw)
-        self.vehicle.airspeed = speed
-    
     def guided_command(self, lat: float, lon: float, alt = 0):
+        if self._verbose: print(lat, lon, alt)
         self.vehicle.simple_goto(LocationGlobal(lat, lon, alt))
     
     def send_GPS(self, lat: float, lon: float, alt: float, satellites_visible = 3):
@@ -213,7 +210,7 @@ class Drone:
         ignore_flags = ignore["vel_horiz"] | ignore["vel_vert"]
         ignore_flags = ignore_flags | ignore["speed_accuracy"] | ignore["horizontal_accuracy"]
         msg = self.vehicle.message_factory.gps_input_encode(
-            time.time(),            #Timestamp (micros since boot or Unix epoch)
+            int(time.time()*10000), #Timestamp (micros since boot or Unix epoch)
             0,                      #ID of the GPS for multiple GPS inputs
             ignore,                 #Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
             0,                      #GPS time (milliseconds from start of GPS week)

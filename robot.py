@@ -44,13 +44,12 @@ def execute(bot: Drone, message: str):
     """
     Execute MQTT message
     """
-    if bot.vehicle.mode.name == "STABLIZE":
+    if bot.vehicle.mode.name == "STABILIZE" or bot.vehicle.mode.name == "MANUAL":
         command = json.loads(message)["command"]
         pitch = int(command[0])
         roll = int(command[1])
         yaw = int(command[2])
         speed = int(command[3])
-        #bot.stabilize_command(pitch, roll, yaw, speed)
         bot.channel_command(pitch, roll, yaw, throttle = speed)
     elif bot.vehicle.mode.name == "GUIDED":
         command = json.loads(message)["command"]
