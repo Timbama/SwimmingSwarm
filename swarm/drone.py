@@ -71,7 +71,8 @@ class Drone:
             self._fire_event("connected")
             if self._verbose: print("Subscribed to broker")
         
-            state = {"alive": True, "gps": self.gps.encoded_coord()}
+            state = {"alive": True}
+            if self.vehicle.mode.name == "GUIDED": state["gps"] = self.gps.encoded_coord()
 
             # Send the initial condition to the PC
             self.node.publish(publishable_link, json.dumps(state, separators = (',', ':')))
@@ -80,7 +81,7 @@ class Drone:
                 try:
                     # Receive and decode the message
                     message = msg_queue.get(timeout=0.1).decode(encoding = 'UTF-8')
-
+                    if self._verbose: print(message)
                     # Fire any commands
                     self._fire_event("message", self, message)
                 except queue.Empty:
