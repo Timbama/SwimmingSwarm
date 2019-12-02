@@ -30,13 +30,6 @@ def main():
     if args.mode == "joystick" or args.mode == "keyboard":
         gui = pyGui.Gui(hasJoystick = args.mode == "joystick")
 
-        def setup():
-            setup_config = {"vehicle_mode": "STABILIZE"}
-            overlord.publish(json.dumps(setup_config, separators=(',',':')))
-            state = json.loads(overlord.get_message(timeout=1))
-            while "alive" not in state:
-                overlord.publish(json.dumps(setup_config, separators=(',',':')))
-
         def render_and_send_command():
             if gui.has_quit():
                 overlord.stop()
@@ -46,8 +39,8 @@ def main():
 
         def manual_command(message):
             def pwm(value):
-                center = (1300 + 1700)/2
-                diff = (1700 - 1300)/2
+                center = (1100 + 1900)/2
+                diff = (1900 - 1100)/2
                 return int(center + (diff * value))
             state = json.loads(message)
             if (state["alive"] == False):
