@@ -39,8 +39,10 @@ def main():
 
         def manual_command(message):
             def pwm(value):
-                center = (1100 + 1900)/2
-                diff = (1900 - 1100)/2
+                max_pwm = 1832
+                min_pwm = 1148
+                center = (max_pwm + min_pwm)/2
+                diff = (max_pwm - min_pwm)/2
                 return int(center + (diff * value))
             state = json.loads(message)
             if (state["alive"] == False):
