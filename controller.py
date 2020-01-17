@@ -1,82 +1,94 @@
-from argparse import ArgumentParser
 import json
 import pyGui
-from swarm.overlord import Overlord
+import socket
+import subprocess
 import time
+from vizier.node import Node
 
-def main():
-    # Parse Command Line Arguments
-    parser = ArgumentParser()
-    parser.add_argument("-configuration", type=str, help = ".json configuration file",
-                        default = "controller_config.json")
-    parser.add_argument("-mode", choices=["auto","keyboard","joystick"], help = "control mode: auto, keyboard or joystick")
-    parser.add_argument("-verbose", action = "store_true")
-    args = parser.parse_args()
+class Controller:
+    def _init_(self, started_node: node.Node):
+        self.node = started_node
 
-    # Ensure that Configuration File can be Opened
-    configuration = None
-    try:
-        f = open(args.configuration, 'r')
-        configuration = json.load(f)
-        f.close()
-    except Exception as e:
-        print(repr(e))
-        print("Cannot open configuration file" + args.configuration)
-        return -1
+        # Get the links for Publishing/Subscribing
+        self.publishable_link = list(started_node.publishable_links)[0]
+        self.subscribable_link = list(started_node.subscribable_links)[0]
+        self.msg_queue = self.node.subscribe(self.subscribable_link)
+    
+    def send(self, message: str):
+        self.node.publish(self.publishable_link, message)
+    
+    def receive(self, block=True, timeout=None):
+        return self.msg_queue.get(block=block, timeout=timeout).decode(encoding = 'UTF-8')
+    
+def start_mosquitto(port: int):
+    command = ["mosquitto", "-p", str(port)]
+    mosquitto = subprocess.Popen(command)
+    time.sleep(0.5)
+    return mosquitto
 
-    # Initializer GUI with keyboard
-    overlord = Overlord(configuration, args.verbose)
+def stop_mosquitto(process: Popen):
+    process.terminate()
+    time.sleep(0.5)
 
-    if args.mode == "joystick" or args.mode == "keyboard":
-        gui = pyGui.Gui(hasJoystick = args.mode == "joystick")
+def get_host_IP():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #the IP address doesn't have to be reachable
+    s.connect(("10.255.255.255", 1)) 
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
 
-        def render_and_send_command():
-            if gui.has_quit():
-                overlord.stop()
-                return
+if __name__ == "__main__":
+    # Default values
+    HOST_PORT = 8080
+    DESC_FILENAME = "./node_desc_controller.json"
+    ALL_MODES = ["joystick", "keyboard", "auto"]
+    MODE = ALL_MODES[0]
+
+    main(HOST_PORT, DESC_FILENAME, MODE)
+
+def main(port: int, desc_filename: str, mode: str):
+    node_desc = None
+    with open(desc_filename, 'r') as desc_file:
+        node_desc = json.load(desc_file)
+    
+    mosquitto = start_mosquitto(HOST_PORT)
+    host_node = Node(get_host_IP(), HOST_PORT, node_desc)
+    host_node.start()
+    controller = Controller(host_node)
+
+    if MODE == "joystick" or MODE == "keyboard":
+        gui = pyGui.Gui(hasJoystick = MODE == "joystick")
+
+        state = {"alive": True}
+        while state["alive"]:
             gui.render()
-            manual_command(overlord.get_message(timeout=0.1))
+            try:
+                state = json.loads(controller.receive(timeout=0.1))
+            except:
+                continue
+            if (MODE == "joystick"):
+                command = gui.get_joystick_axis()
+            elif (MODE == "keyboard"):
+                command = gui.get_keyboard_command()
+            state["command"] = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
+            controller.send(json.dumps(state, separators=(',',':')))
 
-        def manual_command(message):
             def pwm(value):
                 max_pwm = 1832
                 min_pwm = 1148
                 center = (max_pwm + min_pwm)/2
                 diff = (max_pwm - min_pwm)/2
                 return int(center + (diff * value))
-            state = json.loads(message)
-            if (state["alive"] == False):
-                overlord.stop()
-                return
-            if (args.mode == "joystick"):
-                command = gui.get_joystick_axis()
-            elif (args.mode == "keyboard"):
-                command = gui.get_keyboard_command()
-            command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
-            print(command)
-            state["command"] = command
-            overlord.publish(json.dumps(state, separators=(',',':')))
+    elif MODE == "auto":
+        state = {"alive": True}
+        while state["alive"]:
+            try:
+                state = json.loads(controller.receive(timeout=0.1))
+            except:
+                continue
+            state["command"] = {"lat":1,"lon":1,"alt":1}
+            controller.send(json.dumps(state, separators=(',',':')))
 
-        overlord.add_event_listener("loop", render_and_send_command)
-        overlord.add_event_listener("stop", gui.stop)
-    elif args.mode == "auto":
-        def auto_command():
-            state = json.loads(overlord.get_message(timeout=1))
-            print(state)
-            if state["alive"] == False:
-                overlord.stop()
-                return
-            command = {"lat":1,"lon":1,"alt":1}
-            state["command"] = command
-            overlord.publish(json.dumps(state, separators=(',',':')))
-        
-        overlord.add_event_listener("loop", auto_command)
-    else:
-        return
-
-    overlord.start()
-    if args.mode == "joystick" or args.mode == "keyboard":
-        gui.stop()
-
-if(__name__ == "__main__"):
-    main()
+    host_node.stop()
+    stop_mosquitto()
