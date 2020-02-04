@@ -6,7 +6,7 @@ import time
 from vizier.node import Node
 
 class Controller:
-    def _init_(self, started_node: node.Node):
+    def _init_(self, started_node):
         self.node = started_node
 
         # Get the links for Publishing/Subscribing
@@ -26,7 +26,7 @@ def start_mosquitto(port: int):
     time.sleep(0.5)
     return mosquitto
 
-def stop_mosquitto(process: Popen):
+def stop_mosquitto(process: subprocess.Popen):
     process.terminate()
     time.sleep(0.5)
 
