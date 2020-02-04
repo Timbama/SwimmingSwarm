@@ -80,8 +80,8 @@ class Drone:
         print("\nDisarmed")
     
 class GuidedDrone(Drone):
-    def __init__(self, connection_string: str):
-        super().__init__(connection_string, "GUIDED")
+    def __init__(self, node, connection_string: str):
+        super().__init__(node, connection_string, "GUIDED")
         guided_parameters = {
             "EK3_ENABLE": 1,
             "EK2_ENABLE": 0,
@@ -128,8 +128,8 @@ class GuidedDrone(Drone):
         self.vehicle.send_mavlink(msg)
 
 class ManualDrone(Drone):
-    def __init__(self, connection_string: str):
-        super().__init__(connection_string, "MANUAL")
+    def __init__(self, node, connection_string: str):
+        super().__init__(node, connection_string, "MANUAL")
 
     def command(self, pitch: int, roll: int, yaw: int, throttle: int):
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Horizontal throttle, Ch 4=Yaw, Ch 5=Forward throttle
@@ -146,16 +146,6 @@ def host_ready(ip: str, port: int):
     except Exception as e:
         return False
 
-if __name__ == "__main__":
-    # Parse Command Line Arguments
-    HOST_IP = 'localhost'
-    PORT = 8080
-    DESC_FILENAME = './node_desc_robot.json'
-    DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
-    ALL_MODES = ['MANUAL', 'GUIDED']
-    MODE = ALL_MODES[0]
-
-    main(HOST_IP, PORT, DEVICE_ID, MODE)
 
 def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mode: str):
     node_desc = None
@@ -171,11 +161,11 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
 
     drone = None
     if mode == "MANUAL":
-        drone = ManualDrone(connection_string)
+        drone = ManualDrone(node, connection_string)
     elif mode == "GUIDED":
-        drone = GuidedDrone(connection_string)
+        drone = GuidedDrone(node, connection_string)
     else:
-        drone = Drone(connection_string, mode)
+        drone = Drone(node, connection_string, mode)
 
     state = {"alive": True}
     while state["alive"]:
@@ -187,3 +177,14 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
             continue
         state = json.loads(message)
         drone.command(*state)
+
+if __name__ == "__main__":
+    # Parse Command Line Arguments
+    HOST_IP = 'localhost'
+    PORT = 8080
+    DESC_FILENAME = './node_desc_robot.json'
+    DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
+    ALL_MODES = ['MANUAL', 'GUIDED']
+    MODE = ALL_MODES[0]
+
+    main(HOST_IP, PORT, DESC_FILENAME, DEVICE_ID, MODE)
