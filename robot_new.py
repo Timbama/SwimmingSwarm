@@ -3,6 +3,7 @@ import json
 import socket
 import time
 from vizier.node import Node
+import sys
 
 GPS_FIX_TYPE = {
     "no_gps": 0,
@@ -180,7 +181,7 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
 
 if __name__ == "__main__":
     # Parse Command Line Arguments
-    HOST_IP = 'localhost'
+    HOST_IP = str(sys.argv[0])
     PORT = 8080
     DESC_FILENAME = './node_desc_robot.json'
     DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
