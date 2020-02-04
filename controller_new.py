@@ -38,14 +38,6 @@ def get_host_IP():
     s.close()
     return ip
 
-if __name__ == "__main__":
-    # Default values
-    HOST_PORT = 8080
-    DESC_FILENAME = "./node_desc_controller.json"
-    ALL_MODES = ["joystick", "keyboard", "auto"]
-    MODE = ALL_MODES[0]
-
-    main(HOST_PORT, DESC_FILENAME, MODE)
 
 def main(port: int, desc_filename: str, mode: str):
     node_desc = None
@@ -92,3 +84,12 @@ def main(port: int, desc_filename: str, mode: str):
 
     host_node.stop()
     stop_mosquitto()
+
+if __name__ == "__main__":
+    # Default values
+    HOST_PORT = 8080
+    DESC_FILENAME = "./node_desc_controller.json"
+    ALL_MODES = ["joystick", "keyboard", "auto"]
+    MODE = ALL_MODES[0]
+
+    main(HOST_PORT, DESC_FILENAME, MODE)
