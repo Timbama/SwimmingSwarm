@@ -6,7 +6,7 @@ import time
 from vizier.node import Node
 
 class Controller:
-    def _init_(self, started_node):
+    def __init__(self, started_node):
         self.node = started_node
 
         # Get the links for Publishing/Subscribing
