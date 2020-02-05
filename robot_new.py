@@ -181,7 +181,10 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
 
 if __name__ == "__main__":
     # Parse Command Line Arguments
-    HOST_IP = str(sys.argv[0])
+    if len(sys.argv) != 2:
+        print("Arguments invalid\nUsage: python3 robot_new.py [HOST_IP_HERE]")
+        sys.exit(1)
+    HOST_IP = sys.argv[1]           # enter host IP address on call
     PORT = 8080
     DESC_FILENAME = './node_desc_robot.json'
     DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
