@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import json
 import pyGui
 import socket
@@ -38,8 +39,15 @@ def get_host_IP():
     s.close()
     return ip
 
+def pwm(value):
+    max_pwm = 1832
+    min_pwm = 1148
+    center = (max_pwm + min_pwm)/2
+    diff = (max_pwm - min_pwm)/2
+    return int(center + (diff * value))
 
 def main(port: int, desc_filename: str, mode: str):
+    print(mode)
     node_desc = None
     with open(desc_filename, 'r') as desc_file:
         node_desc = json.load(desc_file)
@@ -66,12 +74,6 @@ def main(port: int, desc_filename: str, mode: str):
             state["command"] = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
             controller.send(json.dumps(state, separators=(',',':')))
 
-            def pwm(value):
-                max_pwm = 1832
-                min_pwm = 1148
-                center = (max_pwm + min_pwm)/2
-                diff = (max_pwm - min_pwm)/2
-                return int(center + (diff * value))
     elif MODE == "auto":
         state = {"alive": True}
         while state["alive"]:
@@ -87,9 +89,17 @@ def main(port: int, desc_filename: str, mode: str):
 
 if __name__ == "__main__":
     # Default values
-    HOST_PORT = 8080
     DESC_FILENAME = "./node_desc_controller.json"
     ALL_MODES = ["joystick", "keyboard", "auto"]
-    MODE = ALL_MODES[0]
+
+    # Parse Command Line Arguments
+    parser = ArgumentParser()
+    parser.add_argument("-port", type = int, help = "MQTT Port", default = 8080)
+    parser.add_argument("-mode", choices=ALL_MODES, help = "Control Mode: auto, keyboard or joystick",
+                        default = ALL_MODES[0])
+    args = parser.parse_args()
+
+    HOST_PORT = args.port
+    MODE = args.mode
 
     main(HOST_PORT, DESC_FILENAME, MODE)
