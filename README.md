@@ -1,6 +1,5 @@
 # Software Documentation
 ## Running the Code
-See [this guide](https://github.com/nthieu173/SwimmingSwarm/blob/master/Documentation/Software/VizierWifiController.md#running-the-code).
 - 2/25/2020 Release 0.0.1
 - - Run Controller.py on the topside computer `python ./controller.py -mode joystick` (you can also pass 'keyboard' as the mode to use WASD + QE + CTRL + SHIFT for control)
 - - Run Robot.py on the raspberry pi `python ./robot.py -host HOST_IP -port 8080` (passing the topside computer's ip in place of HOST_IP)
