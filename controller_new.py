@@ -40,8 +40,8 @@ def get_host_IP():
     return ip
 
 def pwm(value):
-    max_pwm = 1832
-    min_pwm = 1148
+    max_pwm = 1590 #1832
+    min_pwm = 1390 #1148
     center = (max_pwm + min_pwm)/2
     diff = (max_pwm - min_pwm)/2
     return int(center + (diff * value))
