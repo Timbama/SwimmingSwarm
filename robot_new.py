@@ -36,7 +36,7 @@ class Drone:
         self.subscribable_link = list(started_node.subscribable_links)[0]
         self.msg_queue = self.node.subscribe(self.subscribable_link)
  
-        print("Connecting")
+        print("Connecting via dronekit")
         connected = False
         while not connected:
             try:
@@ -46,7 +46,7 @@ class Drone:
             except Exception as e:
                 print("Error:", e, "retrying")
                 time.sleep(1)
-        print("Connected")
+        print("Connected successfully")
 
         self.vehicle.mode = dronekit.VehicleMode(vehicle_mode)
         print("Setting mode:", vehicle_mode, end="")
@@ -155,10 +155,14 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
     node = Node(host_ip, port, node_desc)
 
     while not host_ready(host_ip, port):
+        print("Attempting to connect to " + host_ip + " on port" + port + "...")
         time.sleep(1)
         continue
 
+    print("Connected")
     node.start()
+
+    connection_string = "/dev/serial/by-id/" + connection_string
 
     drone = None
     if mode == "MANUAL":
