@@ -5,3 +5,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+pixy.i
+pixy.py
+pixy_python_interface.cpp
+pixy_wrap.cxx
+swig.dat
