@@ -3,6 +3,7 @@ import sys
 from ctypes import *
 from pixy import *
 
+
 class Blocks (Structure):
     _fields_ = [
         ("m_signature", c_uint),
@@ -14,20 +15,44 @@ class Blocks (Structure):
         ("m_index", c_uint),
         ("m_age", c_uint)]
 
+
+class PixyController:
+    def __init__(self):
+        if pixy.init() != 0:
+            print("Error initializing pixy2")
+            sys.exit(0)
+        self.bots = BlockArray(10)
+
+    # Returns a tuple (width, height)
+    def get_frame_dimensions(self):
+        return (pixy.get_frame_width(), pixy.get_frame_height())
+
+    # returns an array of up to 10 detected bots and the number of bots
+    # via a tuple (bots, count)
+    def get_all_bot_positions(self):
+        pixy.change_prog("color_connected_components")
+        count = pixy.ccc_get_blocks(10, self.bots)
+        return (self.bots, count)
+
+    # returns a specific bot by its color code signature, if found,
+    # else None
+    def get_bot_position(self, signature):
+        self.get_all_bot_positions()
+        for bot in self.bots:
+            if bot.m_signature == signature:
+                return bot
+        else:
+            return None
+
+
 if(__name__ == "__main__"):
     print("Pixy2 Controller Test")
-    if pixy.init() != 0:
-        print("Error initializing pixy2")
-        sys.exit(0)
+    pixyController = PixyController()
 
-    print(pixy.get_frame_width())
-    print(pixy.get_frame_height())
-
-    pixy.change_prog("color_connected_components")
-    bots = BlockArray(10)
+    print(pixyController.get_frame_dimensions())
 
     while 1:
-        count = pixy.ccc_get_blocks(10, bots)
+        (bots, count) = pixyController.get_all_bot_positions()
 
         if count > 0:
             print('%d bots found' % count)
