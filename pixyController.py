@@ -1,7 +1,6 @@
 import pixy
 import sys
 from ctypes import *
-#use insepct library to check what pixy, ctypes include
 from pixy import *
 
 
