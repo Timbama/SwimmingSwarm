@@ -4,6 +4,7 @@ import socket
 import time
 from vizier.node import Node
 import sys
+import pixyController
 
 GPS_FIX_TYPE = {
     "no_gps": 0,
@@ -102,30 +103,9 @@ class GuidedDrone(Drone):
     def command(self, lat: float, lon: float, alt = 0):
         self.vehicle.simple_goto(dronekit.LocationGlobal(lat, lon, alt))
 
-    def send_GPS(self, lat: float, lon: float, alt: float, satellites_visible = 3):
-        ignore_flags = 0
-        for flag  in ["vel_horiz", "vel_vert", "speed_accuracy", "horizontal_accuracy"]:
-            ignore_flags = ignore_flags | GPS_INPUT_IGNORE_FLAGS[flag]
-        msg = self.vehicle.message_factory.gps_input_encode(
-            int(time.time()*10000), #Timestamp (micros since boot or Unix epoch)
-            0,                      #ID of the GPS for multiple GPS inputs
-            ignore_flags,                 #Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
-            0,                      #GPS time (milliseconds from start of GPS week)
-            0,                      #GPS week number
-            GPS_FIX_TYPE["3d_fix"], #0-1: no fix, 2: 2D fix, 3: 3D fix. 4: 3D with DGPS. 5: 3D with RTK
-            int(lat * (10**7)),     #Latitude (WGS84), in degrees * 1E7
-            int(lon * (10**7)),     #Longitude (WGS84), in degrees * 1E7
-            alt,                    #Altitude (AMSL, not WGS84), in m (positive for up)
-            0,                      #GPS HDOP horizontal dilution of position in m
-            0,                      #GPS VDOP vertical dilution of position in m
-            0,                      #GPS velocity in m/s in NORTH direction in earth-fixed NED frame
-            0,                      #GPS velocity in m/s in EAST direction in earth-fixed NED frame
-            0,                      #GPS velocity in m/s in DOWN direction in earth-fixed NED frame
-            0,                      #GPS speed accuracy in m/s
-            0,                      #GPS horizontal accuracy in m
-            0,                      #GPS vertical accuracy in m
-            satellites_visible      #Number of satellites visible.
-        )
+    def send_GPS(signature, pixy):
+        bot = pixy.get_bot_position(signature)
+        msg = self.vehicle.message_factory.gps_input_encode(bot) # i'm not sure if that's how message_factory works
         self.vehicle.send_mavlink(msg)
 
 class ManualDrone(Drone):
