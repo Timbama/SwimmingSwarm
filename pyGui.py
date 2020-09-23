@@ -31,6 +31,7 @@ class Gui:
         pygame.font.init()
         pygame.init()
         size = (SCRN_WIDTH, SCRN_HEIGHT)
+        pygame.display.set_caption('Roboquarium Controller')
         self.screen = pygame.display.set_mode(size)
         self.hasJoystick = hasJoystick
 
