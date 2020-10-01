@@ -85,7 +85,7 @@ def main(port: int, desc_filename: str, mode: str):
             controller.send(json.dumps(state, separators=(',',':')))
 
     host_node.stop()
-    stop_mosquitto()
+    stop_mosquitto(mosquitto)
 
 if __name__ == "__main__":
     # Default values
