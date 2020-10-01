@@ -123,7 +123,7 @@ class Overlord:
     def publish(self, message, publishable_link):   #you now have to specify the link you are publishing to
         self.host_node.publish(publishable_link, message)
     
-    def get_message(self, block=True, timeout=None, bot_number):
+    def get_message(self, bot_number, block=True, timeout=None):
         return self.msg_queues[bot_number][1].get(block=block, timeout=timeout).decode(encoding = 'UTF-8')
 
     def add_event_listener(self, event_name: str, listener: callable):

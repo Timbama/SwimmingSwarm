@@ -225,10 +225,11 @@ class Gui:
     def stop(self):
         pygame.quit()
 
-    def get_selected_bot():
-        #todo, need this to return a number ranging from 0 to n - 1 where n is the number of bots; the number represents the current bot selected
-        return 0
-
 def text_objects(text, font):
     textSurface = font.render(text, True, BLACK)
     return textSurface, textSurface.get_rect()
+
+
+def get_selected_bot():
+        #todo, need this to return a number ranging from 0 to n - 1 where n is the number of bots; the number represents the current bot selected
+        return 0
