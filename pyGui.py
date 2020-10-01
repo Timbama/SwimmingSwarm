@@ -19,15 +19,19 @@ SCRN_WIDTH  = 800
 SCRN_HEIGHT = 600
 
 TABS = [
-    'Manual',
     'Guided'
 ]
+
+selected_bot = 0
 
 robo_img = pygame.image.load('Documentation/Images/robo_small.png')
 
 class Gui:
-    def __init__(self, hasJoystick=True):
+    def __init__(self, bots, hasJoystick=True):
+        print(bots)
+
         # Initialize pygame and draw window
+        global TABS
         pygame.font.init()
         pygame.init()
         size = (SCRN_WIDTH, SCRN_HEIGHT)
@@ -35,12 +39,23 @@ class Gui:
         self.screen = pygame.display.set_mode(size)
         self.hasJoystick = hasJoystick
 
+        # Set up tabs
+        TABS_first_part = []
+        for i in range(len(bots)):
+            print(i)
+            TABS_first_part.append('Manual ' + str(i))
+        TABS = TABS_first_part + TABS
+
+
         # Set up state
         self.tabState = TABS[0]
         self.bots = [
             ['bot_id', 'location'],
             ['bot_id', 'location']
         ]
+
+        self.bot_list = bots
+
 
         # Used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
@@ -120,12 +135,16 @@ class Gui:
         pygame.draw.rect(self.screen, DARK_GREY, [0, 0, SCRN_WIDTH, 22])
         manual_color = GREY
         guided_color = GREY
-        if self.tabState == TABS[1]:
+        if self.tabState == TABS[len(self.bot_list)]:
             guided_color = GREEN
         else:
             manual_color = GREEN
-        self.button('Manual', 2, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, 0)
-        self.button('Guided', 64, 2, 60, 18, guided_color, DARK_GREY, menuFont, self.toggle_tab_state, 1)
+        #self.button('Manual', 2, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, 0)
+        final_i = 0
+        for i in range(len(self.bot_list)):
+            self.button('Manual ' + str(i), 2 + 62 * i, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, i)
+            final_i = i
+        self.button('Guided', 2 + 62 *(final_i + 1), 2, 60, 18, guided_color, DARK_GREY, menuFont, self.toggle_tab_state, len(self.bot_list))
         self.button('Quit', 738, 2, 60, 18, GREY, DARK_GREY, menuFont, self.stop)
 
     def get_joystick_axis(self):
@@ -194,7 +213,7 @@ class Gui:
         self.screen.fill(GREY)
         self.draw_menubar()
 
-        if self.tabState == TABS[1]:
+        if self.tabState == TABS[len(self.bot_list)]:
             self.draw_bot_list()
         else:
             if self.hasJoystick:
@@ -216,6 +235,13 @@ class Gui:
     
     def toggle_tab_state(self, idx):
         self.tabState = TABS[idx]
+        global selected_bot
+        if "Manual" in self.tabState:
+            parts = self.tabState.split(' ')
+            selected_bot = int(parts[1])
+        else:
+            selected_bot = len(self.bot_list) #if you're on the guided tab the value returned is 1 past the final bot value
+        print(get_selected_bot())
     
     def has_quit(self):
         for event in pygame.event.get():
@@ -232,4 +258,7 @@ def text_objects(text, font):
 
 def get_selected_bot():
         #todo, need this to return a number ranging from 0 to n - 1 where n is the number of bots; the number represents the current bot selected
-        return 0
+        return selected_bot
+
+#todo
+#display the selected bot val on screen

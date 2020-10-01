@@ -29,7 +29,7 @@ def main():
     print(overlord.bots[1][1])
 
     if args.mode == "joystick" or args.mode == "keyboard":
-        gui = pyGui.Gui(hasJoystick = args.mode == "joystick")
+        gui = pyGui.Gui(overlord.bots, hasJoystick = args.mode == "joystick")
 
         def render_and_send_command():
             if gui.has_quit():

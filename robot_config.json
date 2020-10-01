@@ -4,7 +4,7 @@
     "device_id": "usb-ArduPilot_fmuv2_25003C000E51373339363131-if00",
     "vehicle_mode": "STABILIZE",
     "node": {
-        "end_point" : "robot",
+        "end_point" : "robot1",
         "links" :
         {
             "/state" :
