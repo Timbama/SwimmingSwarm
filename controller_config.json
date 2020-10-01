@@ -4,19 +4,38 @@
         "node": {
             "end_point" : "controller",
             "links" : {
-                "/input" :
+                "/input1" :
+                {
+                "links" : {},
+                "type" : "STREAM"
+                }, 
+                "/input2" :
                 {
                 "links" : {},
                 "type" : "STREAM"
                 }
             },
-            "requests" : [{"link": "robot/state", "type": "STREAM", "required": false}]
+            "requests" : [{"link": "robot1/state", "type": "STREAM", "required": false}, {"link": "robot2/state", "type": "STREAM", "required": false}]
         }
     },
     "bots": [
         {
             "mac": "b8:27:eb:ae:65:e0",
             "username": "pi",
+            "password": "swimmingswarm",
+            "config": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot_config.json",
+                "dest": "/home/pi/SwimmingSwarm/robot_config.json"
+            },
+            "script": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot.py",
+                "dest": "/home/pi/SwimmingSwarm/robot.py"
+            },
+            "update_mode": "always"
+        }, 
+        {
+            "mac": "test mac",
+            "username": "test pi",
             "password": "swimmingswarm",
             "config": {
                 "source": "/home/hieu/source/SwimmingSwarm/robot_config.json",
