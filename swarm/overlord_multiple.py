@@ -90,8 +90,8 @@ class Overlord:
             #self.msg_queue = self.host_node.subscribe(self.subscribable_link)
             self.msg_queues = []            #msg_queue changed to msg_queues which is a list of tuples containing (bot_number, msg_queue) where the msg_queue is the queue for each invididually subscribed link (each one in subscribable_links above)
             #for each bot
-            for i in range(len(bots)):
-                bot = bots[i]
+            for i in range(len(self.bots)):
+                bot = self.bots[i]
                 msg_queue_with_bot_identifier = (bot[0], self.host_node.subscribe(self.subscribable_links[i])) #bot[0] is the mac address, unique so a good identifier; second entry is the msg_queue for this subscribable link
                 msg_queues.append(msg_queue_with_bot_identifier)
             

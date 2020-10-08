@@ -4,12 +4,7 @@
         "node": {
             "end_point" : "controller",
             "links" : {
-                "/input1" :
-                {
-                "links" : {},
-                "type" : "STREAM"
-                }, 
-                "/input2" :
+                "/input" :
                 {
                 "links" : {},
                 "type" : "STREAM"

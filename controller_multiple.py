@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import json
 import pyGui
-from swarm.overlord import Overlord
+from swarm.overlord_multiple import Overlord
 import time
 
 def main():
@@ -26,7 +26,6 @@ def main():
 
     # Initializer GUI with keyboard
     overlord = Overlord(configuration, args.verbose)
-    print(overlord.bots[1][1])
 
     if args.mode == "joystick" or args.mode == "keyboard":
         gui = pyGui.Gui(overlord.bots, hasJoystick = args.mode == "joystick")
@@ -54,7 +53,7 @@ def main():
                 command = gui.get_joystick_axis()
             elif (args.mode == "keyboard"):
                 command = gui.get_keyboard_command()
-            command = (pwm(-command[0]), pwm(-command1[1]), pwm(-command[2]), pwm(-command[3]))
+            command = (pwm(-command[0]), pwm(-command[1]), pwm(-command[2]), pwm(-command[3]))
             print(command)
             state["command"] = command
             overlord.publish(overlord.publishable_links[bot_number], json.dumps(state, separators=(',',':'))) #this now publishes to a specific link given in overlord.publishable_links
