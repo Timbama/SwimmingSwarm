@@ -150,7 +150,7 @@ class Gui:
     def draw_selected_bot(self):
         font = pygame.font.SysFont('Arial', 16)
         text = font.render('Bot #' + str(get_selected_bot()), True, BLACK)
-        screen.blit(text, (10, 30))
+        self.screen.blit(text, (10, 30))
 
     def get_joystick_axis(self):
         if (self.hasJoystick):
