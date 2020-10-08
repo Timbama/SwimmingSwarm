@@ -139,13 +139,18 @@ class Gui:
             guided_color = GREEN
         else:
             manual_color = GREEN
-        #self.button('Manual', 2, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, 0)
+        #self.button('Manual', 2, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, 0) - replaced this with the loop loop below
         final_i = 0
         for i in range(len(self.bot_list)):
             self.button('Manual ' + str(i), 2 + 62 * i, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, i)
             final_i = i
         self.button('Guided', 2 + 62 *(final_i + 1), 2, 60, 18, guided_color, DARK_GREY, menuFont, self.toggle_tab_state, len(self.bot_list))
         self.button('Quit', 738, 2, 60, 18, GREY, DARK_GREY, menuFont, self.stop)
+
+    def draw_selected_bot(self):
+        font = pygame.font.SysFont('Arial', 16)
+        text = font.render('Bot #' + str(get_selected_bot()), True, BLACK)
+        screen.blit(text, (10, 30))
 
     def get_joystick_axis(self):
         if (self.hasJoystick):
@@ -228,6 +233,8 @@ class Gui:
             self.draw_hbar(208, 530, yaw, BLUE)
             self.draw_hbar(208, 70, roll, CYAN)
             self.draw_labels()
+            #draw selected bot
+            self.draw_selected_bot()
 
         pygame.display.flip()
 
