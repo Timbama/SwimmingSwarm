@@ -10,7 +10,7 @@
                 "type" : "STREAM"
                 }
             },
-            "requests" : [{"link": "robot/state", "type": "STREAM", "required": false}]
+            "requests" : [{"link": "robot1/state", "type": "STREAM", "required": false},{"link": "robot2/state", "type": "STREAM", "required": false}]
         }
     },
     "bots": [

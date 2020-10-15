@@ -245,10 +245,13 @@ class Gui:
         global selected_bot
         if "Manual" in self.tabState:
             parts = self.tabState.split(' ')
-            selected_bot = int(parts[1])
+            print(parts)
+            if (len(parts) == 2):
+                selected_bot = int(parts[1])
+            else:
+                selected_bot = 2
         else:
             selected_bot = len(self.bot_list) #if you're on the guided tab the value returned is 1 past the final bot value
-        print(get_selected_bot())
     
     def has_quit(self):
         for event in pygame.event.get():

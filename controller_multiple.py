@@ -36,7 +36,10 @@ def main():
                 return
             gui.render()
             bot_number = pyGui.get_selected_bot() #now gets bot number
-            manual_command(overlord.get_message(bot_number, timeout=0.1), bot_number) #now get message for specific bot number
+            if bot_number == len(overlord.bots):
+                print('manual click')
+            else:
+                manual_command(overlord.get_message(bot_number, timeout=0.1), bot_number) #now get message for specific bot number
 
         def manual_command(message, bot_number): #now accepts bot_number
             def pwm(value):

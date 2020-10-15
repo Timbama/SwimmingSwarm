@@ -1,5 +1,5 @@
 {
-  "end_point" : "robot",
+  "end_point" : "robot1",
   "links" :
   {
     "/state" :
