@@ -120,7 +120,7 @@ class Overlord:
         self._fire_event("stop")
         self.started = False
     
-    def publish(self, message, publishable_link):   #you now have to specify the link you are publishing to
+    def publish(self, publishable_link, message):   #you now have to specify the link you are publishing to
         self.host_node.publish(publishable_link, message)
     
     def get_message(self, bot_number, block=True, timeout=None):
