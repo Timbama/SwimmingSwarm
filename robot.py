@@ -10,7 +10,9 @@ def main():
     parser.add_argument("-port", type = int, help = "MQTT Port")
     parser.add_argument("config", type = str, help = "Config file", nargs="?", default="./robot_config.json")
     parser.add_argument("-local", action = "store_true")
+    parser.add_argument("-index", type = int, help = "Bot Index", default=0)
     parser.add_argument("-verbose", action = "store_true")
+
 
     args = parser.parse_args()
 
@@ -18,13 +20,13 @@ def main():
     config = None
     try:
         f = open(args.config, 'r')
-        config = json.load(f)
+        config = json.load(f)[index]
         f.close()
     except Exception as e:
         print(repr(e))
         print("Couldn't open config file " + args.config)
         return -1
-    
+
     host = args.host
     port = args.port
     if host == None:

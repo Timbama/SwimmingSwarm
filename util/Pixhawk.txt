@@ -1,0 +1,3 @@
+Pixhawk A (0): usb-ArduPilot_fmuv3_44003E001451373232393438-if00
+Pixhawk B (1): usb-ArduPilot_fmuv3_3E003C001451373232393438-if00
+Pixhawk C (2): usb-ArduPilot_fmuv3_290053001451373232393438-if00
