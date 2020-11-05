@@ -4,10 +4,20 @@
         "node": {
             "end_point" : "controller",
             "links" : {
-                "/input" :
+                "/input0" :
                 {
-                "links" : {},
-                "type" : "STREAM"
+                    "links" : {},
+                    "type" : "STREAM"
+                },
+                "/input1" :
+                {
+                    "links" : {},
+                    "type" : "STREAM"
+                },
+                "/input2" :
+                {
+                    "links" : {},
+                    "type" : "STREAM"
                 }
             },
             "requests" : [{"link": "robot0/state", "type": "STREAM", "required": false}, {"link": "robot1/state", "type": "STREAM", "required": false}, {"link": "robot2/state", "type": "STREAM", "required": false}]

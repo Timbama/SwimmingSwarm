@@ -65,7 +65,8 @@ def main():
         overlord.add_event_listener("stop", gui.stop)
     elif args.mode == "auto":
         def auto_command():
-            state = json.loads(overlord.get_message(timeout=1))
+            bot_number = pyGui.get_selected_bot()
+            state = json.loads(overlord.get_message(bot_number, timeout=1))
             print(state)
             if state["alive"] == False:
                 overlord.stop()
