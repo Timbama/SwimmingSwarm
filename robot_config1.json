@@ -1,7 +1,46 @@
+[
+  {
+    "host": "localhost",
+    "port": 8080,
+    "device_id": "usb-ArduPilot_fmuv3_44003E001451373232393438-if00",
+    "vehicle_mode": "STABILIZE",
+    "node": {
+        "end_point" : "robot",
+        "links" :
+        {
+            "/state" :
+            {
+            "links" : {},
+            "type" : "STREAM"
+            }
+        },
+        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+    }
+},
+
 {
     "host": "localhost",
     "port": 8080,
-    "device_id": "usb-ArduPilot_fmuv2_25003C000E51373339363131-if00",
+    "device_id": "usb-ArduPilot_fmuv3_3E003C001451373232393438-if00",
+    "vehicle_mode": "STABILIZE",
+    "node": {
+        "end_point" : "robot",
+        "links" :
+        {
+            "/state" :
+            {
+            "links" : {},
+            "type" : "STREAM"
+            }
+        },
+        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+    }
+},
+
+{
+    "host": "localhost",
+    "port": 8080,
+    "device_id": "usb-ArduPilot_fmuv3_290053001451373232393438-if00",
     "vehicle_mode": "STABILIZE",
     "node": {
         "end_point" : "robot1",
@@ -16,3 +55,4 @@
         "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
     }
 }
+]
