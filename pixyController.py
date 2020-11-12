@@ -22,6 +22,7 @@ class PixyController:
             print("Error initializing pixy2")
             sys.exit(0)
         self.bots = BlockArray(10)
+        self.angles = []
 
     # Returns a tuple (width, height)
     def get_frame_dimensions(self):
@@ -44,6 +45,20 @@ class PixyController:
         else:
             return None
 
+    def get_all_bot_angles(self):
+        (bots, count) = self.get_all_bot_positions()
+        for idx in range(0, count):
+            self.angles[idx] = bots[idx].m_angle
+        return(self.angles)
+
+    def get_bot_angle(self, signature):
+        self.get_all_bot_angles()
+        for bot in self.bots:
+            if bot.m_signature == signature:
+                return bot.m_angle
+        else:
+            return None
+
 
 if(__name__ == "__main__"):
     print("Pixy2 Controller Test")
@@ -57,5 +72,5 @@ if(__name__ == "__main__"):
         if count > 0:
             print('%d bots found' % count)
             for idx in range(0, count):
-                print('[BLOCK: SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature,
-                                                                            bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
+                print('[BLOCK: SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d ANGLE=%3d]' % (bots[idx].m_signature,
+                                                                            bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height, bots[idx].m_angle))

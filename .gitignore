@@ -6,6 +6,7 @@
 __pycache__/
 *.py[cod]
 pixy.i
+_pixy.so
 pixy.py
 pixy_python_interface.cpp
 pixy_wrap.cxx
