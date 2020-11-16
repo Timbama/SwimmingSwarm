@@ -3,7 +3,6 @@ import sys
 from ctypes import *
 from pixy import *
 import math
-from scipy.interpolate import interp1d
 import argparse
 
 COLOR_CODES = {
@@ -72,11 +71,6 @@ class PixyController:
         return (pixel_width, pixel_height)
         
     #map y values from 0 -> pixel_height to pixel_height -> 0; this is so that we have a grid that grows up instead of down with y values
-    def map_y_value(self, y): 
-        pixels = self.get_frame_dimensions_pixels()
-        m = interp1d([0, pixels[1]], [pixels[1], 0])
-        return float(m(y))
-
     #this function takes in an x and y that are centered relative to t the bottom left and shifts
     #them to the middle of the grid. By default,
     #the pixy is centered in the top left and 
@@ -95,7 +89,7 @@ class PixyController:
         return (x + bot_width_half, y - bot_height_half)
 
     def identify_bot(self, signature_int):
-        signature = str(signature_int)
+        signature = oct(signature_int)
         if (not ("1" in signature)):
             return -1
         else:
@@ -111,6 +105,8 @@ class PixyController:
             else:
                 return -1
 
+
+
 if(__name__ == "__main__"):
     print("Pixy2 Controller Test")
     pixyController = PixyController()
@@ -119,7 +115,7 @@ if(__name__ == "__main__"):
     parser = argparse.ArgumentParser(description='Get height for pixy controller')
     parser.add_argument('height')
     args = parser.parse_args()
-    h = args.height
+    h = int(args.height)
 
     pixels = pixyController.get_frame_dimensions_pixels()
     units = pixyController.get_frame_dimensions_units(h)
@@ -146,10 +142,19 @@ if(__name__ == "__main__"):
                 bot_y = bots[idx].m_y
                 bot_width = bots[idx].m_width
                 bot_height = bots[idx].m_height
+                pixels = pixyController.get_frame_dimensions_pixels()
+                units = pixyController.get_frame_dimensions_units(h)
                 #first flip y
-                flipped_y = pixyController.map_y_value(bot_y)
+                #flipped_y = pixyController.map_y_value(bot_y)
                 #then offset x and y to go from bottom left being origin to middle being origin
-                origin_pair = pixyController.offset_values(bot_x, flipped_y)
+                #origin_pair = pixyController.offset_values(bot_x, flipped_y)
                 #then account for bot size
-                true_coords = pixyController.offset_by_bot_dimensions(origin_pair[0], origin_pair[1], bots[idx].m_width, bots[idx].m_height)
-                print('SIG=%d: True coords are %s, %s' % (bots[idx].m_signature, true_coords[0], true_coords[1]))
+                #true_coords = pixyController.offset_by_bot_dimensions(origin_pair[0], origin_pair[1], bots[idx].m_width, bots[idx].m_height)
+                #print('SIG=%d: True coords are %s, %s' % (bots[idx].m_signature, true_coords[0], true_coords[1]))
+                pixel_width = units[0] / pixels[0]
+                pixel_height = units[1] / pixels[1]
+                dist_x = bot_x * pixel_width
+                dist_y = bot_y * pixel_height
+                bot_id = pixyController.identify_bot(bots[idx].m_signature)
+                print("%s is (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
+                print("%s is (%s, %s) units from the origin" % (bot_id, dist_x, dist_y))
