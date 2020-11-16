@@ -89,7 +89,7 @@ class PixyController:
         return (x + bot_width_half, y - bot_height_half)
 
     def identify_bot(self, signature_int):
-        signature = oct(signature_int)
+        signature = str(oct(signature_int))
         if (not ("1" in signature)):
             return -1
         else:
@@ -136,8 +136,9 @@ if(__name__ == "__main__"):
         if count > 0:
             print('%d bots found' % count)
             for idx in range(0, count):
-                print('[BLOCK: SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature,
+                print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature,
                                                                             bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
+                print(bots[idx].m_signature)
                 bot_x = bots[idx].m_x
                 bot_y = bots[idx].m_y
                 bot_width = bots[idx].m_width
