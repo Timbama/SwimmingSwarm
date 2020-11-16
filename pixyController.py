@@ -138,7 +138,6 @@ if(__name__ == "__main__"):
             for idx in range(0, count):
                 print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature,
                                                                             bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
-                print(bots[idx].m_signature)
                 bot_x = bots[idx].m_x
                 bot_y = bots[idx].m_y
                 bot_width = bots[idx].m_width
