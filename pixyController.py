@@ -6,10 +6,11 @@ import math
 import argparse
 
 COLOR_CODES = {
-    "2": "bot0",
-    "3": "bot1",
-    "4": "bot2",
-    "5": "bot3"
+    "bot0": (1, 2),
+    "bot1": (2, 3),
+    "bot2": (3, 4),
+    "bot3": (1, 4),
+    "bot5": (2, 5)
 }
 
 class Blocks (Structure):
@@ -90,21 +91,11 @@ class PixyController:
 
     def identify_bot(self, signature_int):
         signature = str(oct(signature_int))
-        if (not ("1" in signature)):
-            return -1
-        else:
-            if ("2" in signature):
-                #should check that others aren't
-                return COLOR_CODES["2"]
-            elif ("3" in signature):
-                return COLOR_CODES["3"]
-            elif ("4" in signature):
-                return COLOR_CODES["4"]
-            elif ("5" in signature):
-                return COLOR_CODES["5"]
-            else:
-                return -1
-
+        for i in COLOR_CODES:
+            color_code_values = COLOR_CODES[i]
+            if (color_code_values[0] in signature and color_code_values[1] in signature):
+                return i
+        return None
 
 
 if(__name__ == "__main__"):
@@ -123,38 +114,37 @@ if(__name__ == "__main__"):
     pixel_size = pixyController.get_pixel_size(h)
     print("Each pixel is %s units wide and %s units tall" %(pixel_size[0], pixel_size[1]))
 
-    #0,0 for pixy is the top left but we probably want it to be the middle
-    #we also want y values to grow up, not down; we have to flip y values and then offset them
-    #x values grow in the right direction; just need to offset them
-    #thats what the offset_values and map_y_value functions are for
-    #then we need to account for the fact that the pixy also gives us the top left coordinate
-    #for each detected block
-
     while 1:
         (bots, count) = pixyController.get_all_bot_positions()
 
         if count > 0:
             print('%d bots found' % count)
             for idx in range(0, count):
-                print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature,
-                                                                            bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
+                #print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature, bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
+
+                #position in pixels
                 bot_x = bots[idx].m_x
                 bot_y = bots[idx].m_y
+
+                #bot width and height
                 bot_width = bots[idx].m_width
                 bot_height = bots[idx].m_height
+
+                #size of pixy grid in pixels and then in the units the height were given
                 pixels = pixyController.get_frame_dimensions_pixels()
                 units = pixyController.get_frame_dimensions_units(h)
-                #first flip y
-                #flipped_y = pixyController.map_y_value(bot_y)
-                #then offset x and y to go from bottom left being origin to middle being origin
-                #origin_pair = pixyController.offset_values(bot_x, flipped_y)
-                #then account for bot size
-                #true_coords = pixyController.offset_by_bot_dimensions(origin_pair[0], origin_pair[1], bots[idx].m_width, bots[idx].m_height)
-                #print('SIG=%d: True coords are %s, %s' % (bots[idx].m_signature, true_coords[0], true_coords[1]))
+
+                #get height and width of each unit
                 pixel_width = units[0] / pixels[0]
                 pixel_height = units[1] / pixels[1]
+
+                #convert pixels into units
                 dist_x = bot_x * pixel_width
                 dist_y = bot_y * pixel_height
+
                 bot_id = pixyController.identify_bot(bots[idx].m_signature)
-                print("%s is (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
-                print("%s is (%s, %s) units from the origin" % (bot_id, dist_x, dist_y))
+                if bot_id is not None:
+                    print("Unidentified bot at (%s, %s) pixels from the origin" % (bot_x, bot_y))
+                else:
+                    print("%s is (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
+                    #print("%s is (%s, %s) units from the origin" % (bot_id, dist_x, dist_y))

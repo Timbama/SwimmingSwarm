@@ -3,7 +3,6 @@ import json
 import pyGui
 from swarm.overlord import Overlord
 import time
-from pixyController import PixyController
 
 def main():
     # Parse Command Line Arguments
@@ -27,9 +26,6 @@ def main():
 
     # Initializer GUI with keyboard
     overlord = Overlord(configuration, args.verbose)
-
-    # Initialize PixyController
-    pixyController = PixyController()
 
     if args.mode == "joystick" or args.mode == "keyboard":
         gui = pyGui.Gui(hasJoystick = args.mode == "joystick")
@@ -67,7 +63,7 @@ def main():
         def auto_command():
             state = json.loads(overlord.get_message(timeout=1))
             print(state)
-            if state["alive"] == False:x
+            if state["alive"] == False:
                 overlord.stop()
                 return
             command = {"lat":1,"lon":1,"alt":1}
