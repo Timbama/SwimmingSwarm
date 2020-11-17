@@ -10,7 +10,7 @@ COLOR_CODES = {
     "bot1": (2, 3),
     "bot2": (3, 4),
     "bot3": (1, 4),
-    "bot5": (2, 5)
+    "bot4": (2, 5)
 }
 
 class Blocks (Structure):
@@ -76,26 +76,29 @@ class PixyController:
         signature = str(oct(signature_int))
         for i in COLOR_CODES:
             color_code_values = COLOR_CODES[i]
-            if (color_code_values[0] in signature and color_code_values[1] in signature):
+            if (str(color_code_values[0]) in signature and str(color_code_values[1]) in signature):
                 return i
         return None
 
 
 if(__name__ == "__main__"):
-    print("Pixy2 Controller Test")
-    pixyController = PixyController()
 
     #set up arg parser to get height
     parser = argparse.ArgumentParser(description='Get height for pixy controller')
-    parser.add_argument('height')
+    parser.add_argument('--height',required=True)
+    parser.add_argument('--units', required=True)
     args = parser.parse_args()
-    h = int(args.height)
+    h = float(args.height)
+    GRID_UNIT = args.units
+
+    #initilialize pixy
+    pixyController = PixyController()
 
     pixels = pixyController.get_frame_dimensions_pixels()
     units = pixyController.get_frame_dimensions_units(h)
-    print("The grid is %s units wide and %s units tall" %(units[0], units[1]))
+    print("The grid is %s %ss wide and %s %ss tall" %(units[0], GRID_UNIT, units[1], GRID_UNIT))
     pixel_size = pixyController.get_pixel_size(h)
-    print("Each pixel is %s units wide and %s units tall" %(pixel_size[0], pixel_size[1]))
+    print("Each pixel is %s %ss wide and %s %ss tall" %(pixel_size[0], GRID_UNIT pixel_size[1], GRID_UNIT))
 
     while 1:
         (bots, count) = pixyController.get_all_bot_positions()
@@ -130,4 +133,4 @@ if(__name__ == "__main__"):
                     print("Unidentified bot at (%s, %s) pixels from the origin" % (bot_x, bot_y))
                 else:
                     print("%s is (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
-                    #print("%s is (%s, %s) units from the origin" % (bot_id, dist_x, dist_y))
+                    #print("%s is (%s, %s) %ss from the origin" % (bot_id, dist_x, dist_y, GRID_UNIT))
