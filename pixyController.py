@@ -70,24 +70,7 @@ class PixyController:
         #pixel height in real units
         pixel_height = units[1]/pixels[1] #real units per pixel
         return (pixel_width, pixel_height)
-        
-    #map y values from 0 -> pixel_height to pixel_height -> 0; this is so that we have a grid that grows up instead of down with y values
-    #this function takes in an x and y that are centered relative to t the bottom left and shifts
-    #them to the middle of the grid. By default,
-    #the pixy is centered in the top left and 
-    def offset_values(self, x, y):
-        pixels = self.get_frame_dimensions_pixels()
-        half_width = pixels[0] / 2
-        half_height = pixels[1] / 2
-        return (x - half_width, y - half_height)
 
-    #the x and y values must have an origin at the center of the grid with x growing from
-    #left to right and y growing from the bottom up. use the map_y_value and offset_values functions
-    #to translate the default pixycam coordinates this way
-    def offset_by_bot_dimensions(self, x, y, bot_width, bot_height):
-        bot_width_half = bot_width / 2
-        bot_height_half = bot_height / 2
-        return (x + bot_width_half, y - bot_height_half)
 
     def identify_bot(self, signature_int):
         signature = str(oct(signature_int))
