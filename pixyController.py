@@ -7,7 +7,7 @@ import argparse
 
 COLOR_CODES = {
     "bot0": (1, 2),
-    "bot1": (2, 3),
+    "bot1": (1, 3),
     "bot2": (3, 4),
     "bot3": (1, 4),
     "bot4": (2, 5)
@@ -98,7 +98,7 @@ if(__name__ == "__main__"):
     units = pixyController.get_frame_dimensions_units(h)
     print("The grid is %s %ss wide and %s %ss tall" %(units[0], GRID_UNIT, units[1], GRID_UNIT))
     pixel_size = pixyController.get_pixel_size(h)
-    print("Each pixel is %s %ss wide and %s %ss tall" %(pixel_size[0], GRID_UNIT pixel_size[1], GRID_UNIT))
+    print("Each pixel is %s %ss wide and %s %ss tall" %(pixel_size[0], GRID_UNIT, pixel_size[1], GRID_UNIT))
 
     while 1:
         (bots, count) = pixyController.get_all_bot_positions()
@@ -128,9 +128,13 @@ if(__name__ == "__main__"):
                 dist_x = bot_x * pixel_width
                 dist_y = bot_y * pixel_height
 
+                #bot width and height in units
+                width_units = bot_width * pixel_width
+                height_units = bot_height * pixel_height
+
                 bot_id = pixyController.identify_bot(bots[idx].m_signature)
-                if bot_id is not None:
-                    print("Unidentified bot at (%s, %s) pixels from the origin" % (bot_x, bot_y))
+                if bot_id is None:
+                    print("Unidentified %s bot at (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
                 else:
-                    print("%s is (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
-                    #print("%s is (%s, %s) %ss from the origin" % (bot_id, dist_x, dist_y, GRID_UNIT))
+                    print("%s is (%s, %s) pixels from the origin and is %s pixels wide and %s pixels high" % (bot_id, bot_x, bot_y, bot_width, bot_height))
+                    print("%s is (%s, %s) %ss from the origin and is %s %ss wide and %s %ss high" % (bot_id, dist_x, dist_y, GRID_UNIT, width_units, GRID_UNIT, height_units, GRID_UNIT))
