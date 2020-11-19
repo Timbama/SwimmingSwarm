@@ -1,0 +1,22 @@
+How to Compile the Pixy Library
+Look at this lovely guide!
+https://docs.pixycam.com/wiki/doku.php?id=wiki:v2:building_libpixyusb_as_a_python_module_on_linux
+
+If your system does not have Linux Mint installed like the guide assumes, follow these instructions:
+
+If you have Arch and don't know, sorry, figure it out yourself.
+
+If you're on a Mac:
+First, make sure you have home-brew installed:
+https://brew.sh/
+For the first step in the compilation procedure ("Install dependencies for building Python SWIG module"):
+You need to install each package individually, probably, and some of the names are different. So:
+brew install swig
+brew install libusb
+brew install gcc
+brew install git
+Make sure you have the Xcode tools installed, according to a brief Google.
+
+The rest of the instructions should work! For some reason it turns the command line green but uh don't worry about it.
+
+Now, to be able to run our pixy files: Navigate to pixy2/build/python_demos. Move pixy.i, _pixy.so, swig.dat, and pixy.py into your working directory. You did it!
