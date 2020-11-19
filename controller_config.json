@@ -4,13 +4,23 @@
         "node": {
             "end_point" : "controller",
             "links" : {
-                "/input" :
+                "/input0" :
                 {
-                "links" : {},
-                "type" : "STREAM"
+                    "links" : {},
+                    "type" : "STREAM"
+                },
+                "/input1" :
+                {
+                    "links" : {},
+                    "type" : "STREAM"
+                },
+                "/input2" :
+                {
+                    "links" : {},
+                    "type" : "STREAM"
                 }
             },
-            "requests" : [{"link": "robot/state", "type": "STREAM", "required": false}]
+            "requests" : [{"link": "robot0/state", "type": "STREAM", "required": false}, {"link": "robot1/state", "type": "STREAM", "required": false}, {"link": "robot2/state", "type": "STREAM", "required": false}]
         }
     },
     "bots": [
@@ -27,6 +37,35 @@
                 "dest": "/home/pi/SwimmingSwarm/robot.py"
             },
             "update_mode": "always"
+        },
+        {
+            "mac": "b8:27:eb:ae:65:e0",
+            "username": "pi",
+            "password": "swimmingswarm",
+            "config": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot_config.json",
+                "dest": "/home/pi/SwimmingSwarm/robot_config.json"
+            },
+            "script": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot.py",
+                "dest": "/home/pi/SwimmingSwarm/robot.py"
+            },
+            "update_mode": "always"
+        }, 
+        {
+            "mac": "b8:27:eb:ae:65:e0",
+            "username": "pi",
+            "password": "swimmingswarm",
+            "config": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot_config.json",
+                "dest": "/home/pi/SwimmingSwarm/robot_config.json"
+            },
+            "script": {
+                "source": "/home/hieu/source/SwimmingSwarm/robot.py",
+                "dest": "/home/pi/SwimmingSwarm/robot.py"
+            },
+            "update_mode": "always"
         }
+        
     ]
 }

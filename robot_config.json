@@ -5,7 +5,7 @@
     "device_id": "usb-ArduPilot_fmuv3_44003E001451373232393438-if00",
     "vehicle_mode": "STABILIZE",
     "node": {
-        "end_point" : "robot",
+        "end_point" : "robot0",
         "links" :
         {
             "/state" :
@@ -14,7 +14,7 @@
             "type" : "STREAM"
             }
         },
-        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+        "requests" : [{"link": "controller/input0", "type": "STREAM", "required": false}]
     }
 },
 
@@ -24,7 +24,7 @@
     "device_id": "usb-ArduPilot_fmuv3_3E003C001451373232393438-if00",
     "vehicle_mode": "STABILIZE",
     "node": {
-        "end_point" : "robot",
+        "end_point" : "robot1",
         "links" :
         {
             "/state" :
@@ -33,7 +33,7 @@
             "type" : "STREAM"
             }
         },
-        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+        "requests" : [{"link": "controller/input1", "type": "STREAM", "required": false}]
     }
 },
 
@@ -43,7 +43,7 @@
     "device_id": "usb-ArduPilot_fmuv3_290053001451373232393438-if00",
     "vehicle_mode": "STABILIZE",
     "node": {
-        "end_point" : "robot",
+        "end_point" : "robot2",
         "links" :
         {
             "/state" :
@@ -52,7 +52,7 @@
             "type" : "STREAM"
             }
         },
-        "requests" : [{"link": "controller/input", "type": "STREAM", "required": false}]
+        "requests" : [{"link": "controller/input2", "type": "STREAM", "required": false}]
     }
 }
 ]
