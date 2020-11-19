@@ -8,6 +8,7 @@ __pycache__/
 pixy.i
 _pixy.so
 pixy.py
+_pixy.so
 pixy_python_interface.cpp
 pixy_wrap.cxx
 swig.dat
