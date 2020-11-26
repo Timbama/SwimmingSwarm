@@ -98,4 +98,4 @@ Finally, when we are done we need to close the connection.
 node.stop()
 ```
 [1]: https://github.com/robotarium/vizier
-[2]: https://github.com/nthieu173/SwimmingSwarm/blob/849e48bec4546f2969349d917c4d93bd74bb12cf/robot.py
+[2]: https://github.com/tom-hightower/SwimmingSwarm/blob/849e48bec4546f2969349d917c4d93bd74bb12cf/robot.py

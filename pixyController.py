@@ -31,6 +31,7 @@ class PixyController:
             print("Error initializing pixy2")
             sys.exit(0)
         self.bots = BlockArray(10)
+        self.angles = []
 
     # Returns a tuple (width, height)
     def get_frame_dimensions_pixels(self):
@@ -53,6 +54,19 @@ class PixyController:
         else:
             return None
 
+    def get_all_bot_angles(self):
+        (bots, count) = self.get_all_bot_positions()
+        for idx in range(0, count):
+            self.angles[idx] = bots[idx].m_angle
+        return(self.angles)
+
+    def get_bot_angle(self, signature):
+        self.get_all_bot_angles()
+        for bot in self.bots:
+            if bot.m_signature == signature:
+                return bot.m_angle
+        else:
+            return None
     def get_frame_dimensions_units(self, h):
         #width
         width_angle_radians = 60 * math.pi / 180
@@ -111,6 +125,7 @@ if(__name__ == "__main__"):
                 #position in pixels
                 bot_x = bots[idx].m_x
                 bot_y = bots[idx].m_y
+                bot_rot = bots[idx].m_angle
 
                 #bot width and height
                 bot_width = bots[idx].m_width
@@ -136,5 +151,5 @@ if(__name__ == "__main__"):
                 if bot_id is None:
                     print("Unidentified %s bot at (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
                 else:
-                    print("%s is (%s, %s) pixels from the origin and is %s pixels wide and %s pixels high" % (bot_id, bot_x, bot_y, bot_width, bot_height))
+                    print("%s is (%s, %s) pixels from the origin and is %s pixels wide and %s pixels high with %d degrees rotation" % (bot_id, bot_x, bot_y, bot_width, bot_height, bot_rot))
                     print("%s is (%s, %s) %ss from the origin and is %s %ss wide and %s %ss high" % (bot_id, dist_x, dist_y, GRID_UNIT, width_units, GRID_UNIT, height_units, GRID_UNIT))
