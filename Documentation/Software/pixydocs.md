@@ -7,14 +7,30 @@ Utilizes functions from the Pixy python library.
 
 ### Notable functions:
 `get_frame_dimensions_pixels(self)`
+
 Returns the size of the frame of the pixy's field of view in pixels.
+
+
 `get_frame_dimensions_units(self, h)`
+
 Given the height h of the camera from the top of the bot, returns the size of the frame of the pixy's field of view in the same unit as h.
+
+
 `get_all_bot_positions(self)`
+
 Returns an array of structures of information about each detected bot, up to 10 bots.
+
+
 `get_bot_position(self, signature)`
+
 Given a color signature, returns a structure of information about the bot with that signature if detected, otherwise returns None.
+
+
 `get_all_bot_angles(self)`
+
 Returns an array of angles of detected bots.
+
+
 `get_bot_angle(self, signature)`
+
 Given a color signature, returns the angle of the bot with that signature if detected, otherwise returns None.
