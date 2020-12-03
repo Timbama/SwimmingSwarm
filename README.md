@@ -4,6 +4,7 @@
 - - Run Controller.py on the topside computer `python ./controller.py -mode joystick` (you can also pass 'keyboard' as the mode to use WASD + QE + CTRL + SHIFT for control)
 - - Run Robot.py on the raspberry pi `python ./robot.py -host HOST_IP -port 8080` (passing the topside computer's ip in place of HOST_IP)
 
+More usage information can be found [here](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/Usage.md).
 
 ## Setup
 Follow the links from top to bottom for complete installation.
