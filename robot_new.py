@@ -3,6 +3,7 @@ import json
 import socket
 import time
 from vizier.node import Node
+import sys
 
 GPS_FIX_TYPE = {
     "no_gps": 0,
@@ -35,7 +36,7 @@ class Drone:
         self.subscribable_link = list(started_node.subscribable_links)[0]
         self.msg_queue = self.node.subscribe(self.subscribable_link)
  
-        print("Connecting")
+        print("Connecting via dronekit")
         connected = False
         while not connected:
             try:
@@ -45,7 +46,7 @@ class Drone:
             except Exception as e:
                 print("Error:", e, "retrying")
                 time.sleep(1)
-        print("Connected")
+        print("Connected successfully")
 
         self.vehicle.mode = dronekit.VehicleMode(vehicle_mode)
         print("Setting mode:", vehicle_mode, end="")
@@ -80,8 +81,8 @@ class Drone:
         print("\nDisarmed")
     
 class GuidedDrone(Drone):
-    def __init__(self, connection_string: str):
-        super().__init__(connection_string, "GUIDED")
+    def __init__(self, node, connection_string: str):
+        super().__init__(node, connection_string, "GUIDED")
         guided_parameters = {
             "EK3_ENABLE": 1,
             "EK2_ENABLE": 0,
@@ -128,8 +129,8 @@ class GuidedDrone(Drone):
         self.vehicle.send_mavlink(msg)
 
 class ManualDrone(Drone):
-    def __init__(self, connection_string: str):
-        super().__init__(connection_string, "MANUAL")
+    def __init__(self, node, connection_string: str):
+        super().__init__(node, connection_string, "MANUAL")
 
     def command(self, pitch: int, roll: int, yaw: int, throttle: int):
         # Ch1 =Roll, Ch 2=Pitch, Ch 3=Horizontal throttle, Ch 4=Yaw, Ch 5=Forward throttle
@@ -146,16 +147,6 @@ def host_ready(ip: str, port: int):
     except Exception as e:
         return False
 
-if __name__ == "__main__":
-    # Parse Command Line Arguments
-    HOST_IP = 'localhost'
-    PORT = 8080
-    DESC_FILENAME = './node_desc_robot.json'
-    DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
-    ALL_MODES = ['MANUAL', 'GUIDED']
-    MODE = ALL_MODES[0]
-
-    main(HOST_IP, PORT, DEVICE_ID, MODE)
 
 def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mode: str):
     node_desc = None
@@ -164,18 +155,22 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
     node = Node(host_ip, port, node_desc)
 
     while not host_ready(host_ip, port):
+        print("Attempting to connect to " + host_ip + " on port" + port + "...")
         time.sleep(1)
         continue
 
+    print("Connected")
     node.start()
+
+    connection_string = "/dev/serial/by-id/" + connection_string
 
     drone = None
     if mode == "MANUAL":
-        drone = ManualDrone(connection_string)
+        drone = ManualDrone(node, connection_string)
     elif mode == "GUIDED":
-        drone = GuidedDrone(connection_string)
+        drone = GuidedDrone(node, connection_string)
     else:
-        drone = Drone(connection_string, mode)
+        drone = Drone(node, connection_string, mode)
 
     state = {"alive": True}
     while state["alive"]:
@@ -187,3 +182,17 @@ def main(host_ip: str, port: int, desc_filename: str, connection_string: str, mo
             continue
         state = json.loads(message)
         drone.command(*state)
+
+if __name__ == "__main__":
+    # Parse Command Line Arguments
+    if len(sys.argv) != 2:
+        print("Arguments invalid\nUsage: python3 robot_new.py [HOST_IP_HERE]")
+        sys.exit(1)
+    HOST_IP = sys.argv[1]           # enter host IP address on call
+    PORT = 8080
+    DESC_FILENAME = './node_desc_robot.json'
+    DEVICE_ID = 'usb-ArduPilot_fmuv2_25003C000E51373339363131-if00'
+    ALL_MODES = ['MANUAL', 'GUIDED']
+    MODE = ALL_MODES[0]
+
+    main(HOST_IP, PORT, DESC_FILENAME, DEVICE_ID, MODE)

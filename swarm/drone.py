@@ -210,7 +210,7 @@ class Drone:
         }
         ignore_flags = ignore["vel_horiz"] | ignore["vel_vert"]
         ignore_flags = ignore_flags | ignore["speed_accuracy"] | ignore["horizontal_accuracy"]
-        msg = self.vehicle.message_factory.gps_input_encode(
+        msg = self.vehicle.channels(
             int(time.time()*10000), #Timestamp (micros since boot or Unix epoch)
             0,                      #ID of the GPS for multiple GPS inputs
             ignore,                 #Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
