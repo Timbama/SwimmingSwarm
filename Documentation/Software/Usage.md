@@ -4,7 +4,7 @@ A general guide to setting up necessary configuration files and running the Swar
 
 ## Prereqs
 
-Prior to running this software, follow the [topside computer](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/TopsideComputer.md) and [raspberry pi](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/RaspberryPi.md) setup guides.
+Prior to running this software, follow the [topside computer](Documentation/Software/TopsideComputer.md) and [raspberry pi](Documentation/Software/RaspberryPi.md) setup guides.
 
 Also set up the configuration files as described later in this document.
 
@@ -40,7 +40,7 @@ This config file is for the Controller. It has 2 main components
     1. port
        - The port the controller will be running on
     2. node
-       - The vizier (MQTT) descriptor for the topside computer node. This basically describes the routes the node will publish on/subscribe to.  The inner structure of `node` is described in the [Vizier Guide](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/Vizier.md#installation)
+       - The vizier (MQTT) descriptor for the topside computer node. This basically describes the routes the node will publish on/subscribe to.  The inner structure of `node` is described in the [Vizier Guide](Documentation/Software/Vizier.md#installation)
 - bots
     A list of bot objects, one for each actual bot we have. Needs 2 attributes at the moment:
     1. color_codes
@@ -55,8 +55,8 @@ This config file is for all the running bots. It is a list of objects, each with
 2. port
    - The port on the controller computer this bot should connect to (default 8080)
 3. device_id
-   - This is the pixhawk's UID. it's needed by the robot script in order to connect to the pixhawk. The current pixhawk id's can be found in [Pixhawk.txt](https://github.com/tom-hightower/SwimmingSwarm/blob/master/util/Pixhawk.txt)
+   - This is the pixhawk's UID. it's needed by the robot script in order to connect to the pixhawk. The current pixhawk id's can be found in [Pixhawk.txt](util/Pixhawk.txt)
 4. vehicle_mode
    - One of the drone-kit supported vehicle modes. See the [dronekit docs](https://dronekit-python.readthedocs.io/en/latest/automodule.html#dronekit.VehicleMode) for more details on the various vehicle modes. Use "STABILIZE" if unsure of what this value should be.
 5. node
-   - The vizier (MQTT) descriptor for the topside computer node. This basically describes the routes the node will publish on/subscribe to. The inner structure of `node` is described in the [Vizier Guide](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/Vizier.md#installation)
+   - The vizier (MQTT) descriptor for the topside computer node. This basically describes the routes the node will publish on/subscribe to. The inner structure of `node` is described in the [Vizier Guide](Documentation/Software/Vizier.md#installation)

@@ -1,7 +1,7 @@
 # Installation
 
 ## Install QGroundControl
-*If QGroundControl won't start/show the GUI see [this troubleshooting section](https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Troubleshooting.md#software-wont-display-guistart)* 
+*If QGroundControl won't start/show the GUI see [this troubleshooting section](Documentation/Troubleshooting.md#software-wont-display-guistart)* 
 
 Follow the instructions found [here](https://docs.qgroundcontrol.com/en/getting_started/download_and_install.html)
 
@@ -11,4 +11,4 @@ Follow the instructions found [here](https://docs.qgroundcontrol.com/en/getting_
 install pygame by running `sudo pip3 install pygame`
 
 # Vizier
-See [this guide][https://github.com/tom-hightower/SwimmingSwarm/blob/master/Documentation/Software/Vizier.md#installation] for installing vizier.
+See [this guide][Documentation/Software/Vizier.md#installation] for installing vizier.
