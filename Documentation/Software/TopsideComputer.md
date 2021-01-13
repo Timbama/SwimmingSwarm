@@ -11,4 +11,4 @@ Follow the instructions found [here](https://docs.qgroundcontrol.com/en/getting_
 install pygame by running `sudo pip3 install pygame`
 
 # Vizier
-See [this guide][Vizier.md#installation] for installing vizier.
+See [this guide][./Vizier.md#installation] for installing vizier.

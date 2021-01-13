@@ -1,6 +1,5 @@
 # Raspberry Pi
 ## Raspberry Pi won't connect to Pixhawk
-*If this does not fix the issue check [here][2] for another possible solution*
 
 The Raspberry pi won't connect to the pixhawk when the pi is showing the low voltage indicator
 ([a lightning bolt in the top right corner of the screen][1]). This can be caused by a variety of reasons but is usually due to
@@ -33,14 +32,13 @@ Sometimes if the Raspberry Pi isn't connected to a screen when it is powered on 
 ## Pixhawk won't connect to Raspberry Pi
 Sometimes the Pixhawk won't connect to MavLink if it does not have backup power throught the ESC's. This is because the Pixhawk treats being powered over USB as being on a testbed and won't arm without a seperate backup power source. 
 This can be resolved by powering the Pixhawk through Telemetry2 or by hooking the ESC's up to a power supply/battery.
-    
+
 # Ubuntu
 ## Software Won't Display GUI/Start
 Ubuntu 17 experimented with using a new display server protocol called Wayland. This causes a lot of issues
-since the majority of programs for Ubuntu assume that the display server will be Xorg. [This guide][3] shows how to switch
+since the majority of programs for Ubuntu assume that the display server will be Xorg. [This guide][2] shows how to switch
 the display server back to Xorg.
 
 
 [1]: https://lowpowerlab.com/wp-content/uploads/2016/09/Pi3LoadTest_LowVoltage.jpg
-[2]: ./Troubleshooting.md#raspberry-pi-won't-connect-to-pixhawk
-[3]: https://itsfoss.com/switch-xorg-wayland/
+[2]: https://itsfoss.com/switch-xorg-wayland/

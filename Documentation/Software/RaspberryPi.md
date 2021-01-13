@@ -47,7 +47,7 @@ Then build Limesuite by following [this guide][8].
 
 [1]: https://www.raspberrypi.org/downloads/raspbian/
 [2]: https://etcher.io/
-[3]: ../Vizier.md#installation
+[3]: ./Vizier.md#installation
 [4]: https://github.com/pothosware/SoapySDR/wiki/BuildGuide
 [5]: https://osmocom.org/projects/gr-osmosdr/wiki#Build-process
 [6]: https://wiki.myriadrf.org/Lime_Suite#Ubuntu
