@@ -34,4 +34,4 @@ Which pin to connect the signal wire to depends on what firmware was flashed to 
 
 [1]: https://github.com/4712/BLHeliSuite/releases/tag/16714901
 [2]: https://oscarliang.com/esc-1-wire-bootloader-signal-cable-blheli-simonk/
-[3]: https://raw.githubusercontent.com/nthieu173/SwimmingSwarm/master/Documentation/Images/ESCFirmware.PNG
+[3]: ../Images/ESCFirmware.PNG

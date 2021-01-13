@@ -9,5 +9,5 @@ quickly enough.
    * Topside Computer: `python3 guiController.py -p 8080`
    * Raspberry Pi: `python3 robot.py (IP address of topside computer)`
 
-[1]: robot.py#L34
-[2]: guiController.py#L72
+[1]: ../../robot.py#L34
+[2]: ../../guiController.py#L72
