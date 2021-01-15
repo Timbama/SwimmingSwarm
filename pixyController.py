@@ -10,10 +10,11 @@ COLOR_CODES = {
     "bot1": (1, 3),
     "bot2": (3, 4),
     "bot3": (1, 4),
-    "bot4": (2, 5)
+    "bot4": (2, 5),
 }
 
-class Blocks (Structure):
+
+class Blocks(Structure):
     _fields_ = [
         ("m_signature", c_uint),
         ("m_x", c_uint),
@@ -22,7 +23,8 @@ class Blocks (Structure):
         ("m_height", c_uint),
         ("m_angle", c_uint),
         ("m_index", c_uint),
-        ("m_age", c_uint)]
+        ("m_age", c_uint),
+    ]
 
 
 class PixyController:
@@ -58,7 +60,7 @@ class PixyController:
         (bots, count) = self.get_all_bot_positions()
         for idx in range(0, count):
             self.angles[idx] = bots[idx].m_angle
-        return(self.angles)
+        return self.angles
 
     def get_bot_angle(self, signature):
         self.get_all_bot_angles()
@@ -67,11 +69,12 @@ class PixyController:
                 return bot.m_angle
         else:
             return None
+
     def get_frame_dimensions_units(self, h):
-        #width
+        # width
         width_angle_radians = 60 * math.pi / 180
         width = 2 * h / math.tan(width_angle_radians)
-        #height
+        # height
         height_angle_radians = 70 * math.pi / 180
         height = 2 * h / math.tan(height_angle_radians)
         return (width, height)
@@ -79,77 +82,103 @@ class PixyController:
     def get_pixel_size(self, h):
         pixels = self.get_frame_dimensions_pixels()
         units = self.get_frame_dimensions_units(h)
-        #pixel width in real units
-        pixel_width = units[0]/pixels[0] #real units per pixel
-        #pixel height in real units
-        pixel_height = units[1]/pixels[1] #real units per pixel
+        # pixel width in real units
+        pixel_width = units[0] / pixels[0]  # real units per pixel
+        # pixel height in real units
+        pixel_height = units[1] / pixels[1]  # real units per pixel
         return (pixel_width, pixel_height)
-
 
     def identify_bot(self, signature_int):
         signature = str(oct(signature_int))
         for i in COLOR_CODES:
             color_code_values = COLOR_CODES[i]
-            if (str(color_code_values[0]) in signature and str(color_code_values[1]) in signature):
+            if (
+                str(color_code_values[0]) in signature
+                and str(color_code_values[1]) in signature
+            ):
                 return i
         return None
 
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
 
-    #set up arg parser to get height
-    parser = argparse.ArgumentParser(description='Get height for pixy controller')
-    parser.add_argument('--height',required=True)
-    parser.add_argument('--units', required=True)
+    # set up arg parser to get height
+    parser = argparse.ArgumentParser(description="Get height for pixy controller")
+    parser.add_argument("--height", required=True)
+    parser.add_argument("--units", required=True)
     args = parser.parse_args()
     h = float(args.height)
     GRID_UNIT = args.units
 
-    #initilialize pixy
+    # initilialize pixy
     pixyController = PixyController()
 
     pixels = pixyController.get_frame_dimensions_pixels()
     units = pixyController.get_frame_dimensions_units(h)
-    print("The grid is %s %ss wide and %s %ss tall" %(units[0], GRID_UNIT, units[1], GRID_UNIT))
+    print(
+        "The grid is %s %ss wide and %s %ss tall"
+        % (units[0], GRID_UNIT, units[1], GRID_UNIT)
+    )
     pixel_size = pixyController.get_pixel_size(h)
-    print("Each pixel is %s %ss wide and %s %ss tall" %(pixel_size[0], GRID_UNIT, pixel_size[1], GRID_UNIT))
+    print(
+        "Each pixel is %s %ss wide and %s %ss tall"
+        % (pixel_size[0], GRID_UNIT, pixel_size[1], GRID_UNIT)
+    )
 
     while 1:
         (bots, count) = pixyController.get_all_bot_positions()
 
         if count > 0:
-            print('%d bots found' % count)
+            print("%d bots found" % count)
             for idx in range(0, count):
-                #print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature, bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
+                # print('[BLOCK: SIG=%o X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (bots[idx].m_signature, bots[idx].m_x, bots[idx].m_y, bots[idx].m_width, bots[idx].m_height))
 
-                #position in pixels
+                # position in pixels
                 bot_x = bots[idx].m_x
                 bot_y = bots[idx].m_y
                 bot_rot = bots[idx].m_angle
 
-                #bot width and height
+                # bot width and height
                 bot_width = bots[idx].m_width
                 bot_height = bots[idx].m_height
 
-                #size of pixy grid in pixels and then in the units the height were given
+                # size of pixy grid in pixels and then in the units the height were given
                 pixels = pixyController.get_frame_dimensions_pixels()
                 units = pixyController.get_frame_dimensions_units(h)
 
-                #get height and width of each unit
+                # get height and width of each unit
                 pixel_width = units[0] / pixels[0]
                 pixel_height = units[1] / pixels[1]
 
-                #convert pixels into units
+                # convert pixels into units
                 dist_x = bot_x * pixel_width
                 dist_y = bot_y * pixel_height
 
-                #bot width and height in units
+                # bot width and height in units
                 width_units = bot_width * pixel_width
                 height_units = bot_height * pixel_height
 
                 bot_id = pixyController.identify_bot(bots[idx].m_signature)
                 if bot_id is None:
-                    print("Unidentified %s bot at (%s, %s) pixels from the origin" % (bot_id, bot_x, bot_y))
+                    print(
+                        "Unidentified %s bot at (%s, %s) pixels from the origin"
+                        % (bot_id, bot_x, bot_y)
+                    )
                 else:
-                    print("%s is (%s, %s) pixels from the origin and is %s pixels wide and %s pixels high with %d degrees rotation" % (bot_id, bot_x, bot_y, bot_width, bot_height, bot_rot))
-                    print("%s is (%s, %s) %ss from the origin and is %s %ss wide and %s %ss high" % (bot_id, dist_x, dist_y, GRID_UNIT, width_units, GRID_UNIT, height_units, GRID_UNIT))
+                    print(
+                        "%s is (%s, %s) pixels from the origin and is %s pixels wide and %s pixels high with %d degrees rotation"
+                        % (bot_id, bot_x, bot_y, bot_width, bot_height, bot_rot)
+                    )
+                    print(
+                        "%s is (%s, %s) %ss from the origin and is %s %ss wide and %s %ss high"
+                        % (
+                            bot_id,
+                            dist_x,
+                            dist_y,
+                            GRID_UNIT,
+                            width_units,
+                            GRID_UNIT,
+                            height_units,
+                            GRID_UNIT,
+                        )
+                    )
