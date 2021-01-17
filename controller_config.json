@@ -1,7 +1,7 @@
 {
     "broker": {
         "ip": "localhost",
-        "port": 8080
+        "port": 1883
     },
     "node": {
         "end_point": "controller",
@@ -39,16 +39,16 @@
     },
     "bots": [
         {
-            "name": "robot0",
-            "link": "robot0/state"
+            "sub_link": "robot0/state",
+            "pub_link": "controller/input0"
         },
         {
-            "name": "robot1",
-            "link": "robot1/state"
+            "sub_link": "robot1/state",
+            "pub_link": "controller/input1"
         },
         {
-            "name": "robot2",
-            "link": "robot2/state"
+            "sub_link": "robot2/state",
+            "pub_link": "controller/input2"
         }
     ]
 }
