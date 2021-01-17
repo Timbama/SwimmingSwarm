@@ -4,6 +4,7 @@ Simplify connection and communication through an MQTT broker
 
 import json
 import queue
+import logging
 from typing import Dict
 
 from vizier import node
@@ -33,7 +34,9 @@ class Overlord:
             broker_ip = configuration["broker"]["ip"]
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
-            return cls.new(broker_ip, broker_port, node_descriptor)
+            overlord = cls()
+            overlord.host_node = node.Node(broker_ip, broker_port, node_descriptor)
+            return overlord
 
     @classmethod
     def new(cls, broker_ip: str, broker_port: int, node_descriptor: Dict):
@@ -42,8 +45,6 @@ class Overlord:
         """
         overlord = cls()
         overlord.host_node = node.Node(broker_ip, broker_port, node_descriptor)
-        overlord.active = False
-        overlord.subscribables = {}
         return overlord
 
     def handle_start(self):
@@ -76,7 +77,10 @@ class Overlord:
         self.host_node.start()
         self.handle_start()
 
+        logging.info("Publishable links %s", self.host_node.subscribable_links)
+
         for link in self.host_node.subscribable_links:
+            logging.info("Subscribing to %s", link)
             self.subscribables[link] = self.host_node.subscribe(link)
 
         self.active = True
@@ -84,10 +88,13 @@ class Overlord:
             for link in self.subscribables:
                 sub_queue = self.subscribables[link]
                 try:
-                    msg = sub_queue.get(block=False).decode(encoding="UTF-8")
+                    msg = sub_queue.get_nowait()
                     self.handle_message(link, msg)
                 except queue.Empty:
-                    pass
+                    continue
+                except KeyboardInterrupt:
+                    self.stop()
+                    break
 
         self.handle_stop()
         self.host_node.stop()

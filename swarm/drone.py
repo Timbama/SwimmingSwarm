@@ -11,6 +11,8 @@ from typing import Dict
 from vizier import node
 from dronekit import connect, VehicleMode
 
+from dronekit_sitl import SITL
+
 
 class Drone:
     """
@@ -33,9 +35,11 @@ class Drone:
             broker_ip = configuration["broker"]["ip"]
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
-            return cls.new(
-                connection_string, vehicle_mode, broker_ip, broker_port, node_descriptor
-            )
+            drone = cls()
+            drone.drone_node = node.Node(broker_ip, broker_port, node_descriptor)
+            drone.vehicle = connect(connection_string, wait_ready=True, baud=57600)
+            drone.set_vehicle_mode(vehicle_mode)
+            return drone
 
     @classmethod
     def new(
@@ -47,13 +51,14 @@ class Drone:
         node_descriptor: Dict,
     ):
         """
-        Create new Overlord from connection_string, vehicle_mode,
+        Create new Drone from connection_string, vehicle_mode,
         broker ip, broker port and a node descriptor dict
         """
-        drone = Drone()
+        drone = cls()
         drone.drone_node = node.Node(broker_ip, broker_port, node_descriptor)
         drone.vehicle = connect(connection_string, wait_ready=True, baud=57600)
         drone.set_vehicle_mode(vehicle_mode)
+        return drone
 
     def __init__(self):
         self.drone_node = None
@@ -68,37 +73,40 @@ class Drone:
         # Wait for vehicle armable
         self.wait_vehicle_armable()
         # Arm verhicle
-        self.set_vehicle_armed(True)
+        self.arm_vehicle()
         # Start Vizier node
         self.drone_node.start()
         # Trigger overriden function after vehicle had been armed and Vizier node set up
         self.handle_start()
         # Subscribe to all links
         for link in self.drone_node.subscribable_links:
+            logging.info("Subscribing to %s", link)
             self.subscribables[link] = self.drone_node.subscribe(link)
 
-        # Send the initial condition
         state = {"alive": True}
 
-        for link in self.drone_node.publishable_links:
-            self.drone_node.publish(link, json.dumps(state, separators=(",", ":")))
+        # Send the initial condition
+        self.publish_all(json.dumps(state, separators=(",", ":")))
 
+        self.active = True
+
+        logging.info("Listening for messages")
         while self.active:
             for link in self.subscribables:
                 sub_queue = self.subscribables[link]
                 try:
-                    msg = sub_queue.get(block=False).decode(encoding="UTF-8")
+                    msg = sub_queue.get(timeout=0.1)
                     self.handle_message(link, msg)
                 except queue.Empty:
-                    pass
+                    time.sleep(0.1)
+                except KeyboardInterrupt:
+                    self.stop()
 
-        # Disarm verhicle
-        self.set_vehicle_armed(False)
+        # Stop verhicle
+        self.vehicle.close()
+
         self.handle_stop()
         self.drone_node.stop()
-
-        # Disarm vehicle
-        self.set_vehicle_armed(False)
 
     def handle_start(self):
         """
@@ -140,14 +148,15 @@ class Drone:
         while self.vehicle.mode.name != new_mode:
             time.sleep(1)
 
-    def set_vehicle_armed(self, armed: bool):
+    def arm_vehicle(self):
         """
         Arm the vehicle. Will block until vehicle is armed.
         """
-        logging.info("Arming motors" if armed else "Disarming motors")
-        self.vehicle.armed = armed
+        logging.info("Arming motors")
+        self.vehicle.armed = True
         while not self.vehicle.armed:
             time.sleep(1)
+        logging.info("Arming complete")
 
     def wait_vehicle_armable(self):
         """
@@ -156,6 +165,7 @@ class Drone:
         logging.info("Basic pre-arm checks")
         while not self.vehicle.is_armable:
             time.sleep(1)
+        logging.info("Pre-arm checks complete")
 
     def publish(self, link: str, message: str):
         """
@@ -179,3 +189,60 @@ class Drone:
         self.vehicle.channels.overrides["2"] = pitch
         self.vehicle.channels.overrides["5"] = throttle
         self.vehicle.channels.overrides["4"] = yaw
+
+
+class DroneSitl(Drone):
+    """
+    To use this class, you must override handle_start, handle_message and/or handle_stop.
+    Then, create this class either through new() or from_config().
+    DO NOT use __init__().
+    Finally, run start(). stop() must be arranged to
+    be called else start() will block forever
+    """
+
+    @classmethod
+    def from_config(cls, config_path: str, sitl_path: str):
+        """
+        Create new Drone from a configuration file. Ignores connection_string to use SITL.
+        """
+        # pylint: disable=arguments-differ
+        with open(config_path, "r") as file:
+            configuration = json.load(file)
+            sitl = SITL(path=sitl_path)
+            sitl.launch([])
+            vehicle_mode = configuration["vehicle_mode"]
+            broker_ip = configuration["broker"]["ip"]
+            broker_port = configuration["broker"]["port"]
+            node_descriptor = configuration["node"]
+            return cls.new(
+                sitl,
+                vehicle_mode,
+                broker_ip,
+                broker_port,
+                node_descriptor,
+            )
+
+    @classmethod
+    def new(
+        cls,
+        sitl: SITL,
+        vehicle_mode: str,
+        broker_ip: str,
+        broker_port: int,
+        node_descriptor: Dict,
+    ):
+        """
+        Create new Drone from SITL simulator, vehicle_mode,
+        broker ip, broker port and a node descriptor dict
+        """
+        # pylint: disable=arguments-differ
+        drone = cls()
+        drone.sitl = sitl
+        drone.drone_node = node.Node(broker_ip, broker_port, node_descriptor)
+        drone.vehicle = connect(drone.sitl.connection_string(), wait_ready=True)
+        drone.set_vehicle_mode(vehicle_mode)
+        return drone
+
+    def __init__(self):
+        super().__init__()
+        self.sitl = None
