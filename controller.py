@@ -80,8 +80,8 @@ class ManualOverlord(Overlord):
             )
             state["command"] = command
 
-        link = self.sub_to_pub[link]
-        self.publish(link, json.dumps(state, separators=(",", ":")))
+        pub_link = self.sub_to_pub[link]
+        self.publish(pub_link, json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
 
 

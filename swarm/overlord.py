@@ -20,7 +20,7 @@ class Overlord:
     """
 
     def __init__(self):
-        self.host_node = None
+        self.host_node = None  # Vizier node
         self.active = False
         self.subscribables = {}
 
@@ -55,7 +55,7 @@ class Overlord:
         # pylint: disable=no-self-use
         return
 
-    def handle_message(self, link: str, msg: str):
+    def handle_message(self, link: str, msg):
         """
         You must implement this method to handle messages published by a robot.
         """
@@ -79,16 +79,17 @@ class Overlord:
 
         logging.info("Publishable links %s", self.host_node.subscribable_links)
 
-        for link in self.host_node.subscribable_links:
+        # Node
+        for link in self.host_node.subscribable_links:  # set
             logging.info("Subscribing to %s", link)
-            self.subscribables[link] = self.host_node.subscribe(link)
+            self.subscribables[link] = self.host_node.subscribe(link)  # queue
 
         self.active = True
         while self.active:
             for link in self.subscribables:
                 sub_queue = self.subscribables[link]
                 try:
-                    msg = sub_queue.get_nowait()
+                    msg = sub_queue.get_nowait()  # Get latest message
                     self.handle_message(link, msg)
                 except queue.Empty:
                     continue

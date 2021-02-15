@@ -3,8 +3,8 @@
         "ip": "localhost",
         "port": 1883
     },
-    "connection_string": "/dev/serial/by-id/usb-ArduPilot_fmuv3_290053001451373232393438-if00",
-    "vehicle_mode": "STABILIZE",
+    "connection_string": "/dev/serial/by-id/usb-ArduPilot_fmuv3-BL_290053001451373232393438-if00",
+    "vehicle_mode": "MANUAL",
     "node": {
         "end_point": "robot2",
         "links": {

@@ -4,7 +4,7 @@
         "port": 1883
     },
     "connection_string": "/dev/serial/by-id/usb-ArduPilot_fmuv3_44003E001451373232393438-if00",
-    "vehicle_mode": "STABILIZE",
+    "vehicle_mode": "MANUAL",
     "node": {
         "end_point": "robot0",
         "links": {
