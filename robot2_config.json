@@ -3,7 +3,7 @@
         "ip": "localhost",
         "port": 1883
     },
-    "connection_string": "/dev/serial/by-id/usb-ArduPilot_fmuv3-BL_290053001451373232393438-if00",
+    "connection_string": "/dev/serial/by-id/usb-ArduPilot_Pixhawk1_290053001451373232393438-if00",
     "vehicle_mode": "MANUAL",
     "node": {
         "end_point": "robot2",
