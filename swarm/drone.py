@@ -161,6 +161,8 @@ class Drone:
     def wait_vehicle_armable(self):
         """
         Block until the vehicle is armable.
+
+        There are some problem with this check when testing without batteries, needs more investigation
         """
         logging.info("Basic pre-arm checks")
         while not self.vehicle.is_armable:

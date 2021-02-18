@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 
 from swarm.drone import Drone, DroneSitl
 
+# logging.basicConfig(level=logging.INFO)
+
 
 class ManualDrone(Drone):
     def handle_start(self):
