@@ -9,8 +9,6 @@ COLOR_CODES = {
     "bot0": (1, 2),
     "bot1": (1, 3),
     "bot2": (3, 4),
-    "bot3": (1, 4),
-    "bot4": (2, 5),
 }
 
 
@@ -28,12 +26,13 @@ class Blocks(Structure):
 
 
 class PixyController:
-    def __init__(self):
+    def __init__(self, h):
         if pixy.init() != 0:
             print("Error initializing pixy2")
             sys.exit(0)
         self.bots = BlockArray(10)
         self.angles = []
+        self.h = h # This is the height of the pixyController off the ground in meters
 
     # Returns a tuple (width, height)
     def get_frame_dimensions_pixels(self):
@@ -98,6 +97,25 @@ class PixyController:
             ):
                 return i
         return None
+
+    def get_bot_position_units(self, bot):
+        pixels = self.get_frame_dimensions_pixels()
+        units = self.get_frame_dimensions_units(self.h)
+
+        # position in pixels
+        bot_x = bot.m_x
+        bot_y = bot.m_y
+        bot_rot = bot.m_angle
+
+        # get height and width of each unit
+        pixel_width = units[0] / pixels[0]
+        pixel_height = units[1] / pixels[1]
+
+        # convert pixels into units
+        dist_x = bot_x * pixel_width
+        dist_y = bot_y * pixel_height
+
+        return (dist_x, dist_y)
 
 
 if __name__ == "__main__":
