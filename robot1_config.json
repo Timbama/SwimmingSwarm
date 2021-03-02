@@ -1,0 +1,24 @@
+{
+    "broker": {
+        "ip": "localhost",
+        "port": 1883
+    },
+    "connection_string": "/dev/serial/by-id/usb-ArduPilot_fmuv3_3E003C001451373232393438-if00",
+    "vehicle_mode": "MANUAL",
+    "node": {
+        "end_point": "robot1",
+        "links": {
+            "/state": {
+                "links": {},
+                "type": "STREAM"
+            }
+        },
+        "requests": [
+            {
+                "link": "controller/input1",
+                "type": "STREAM",
+                "required": false
+            }
+        ]
+    }
+}

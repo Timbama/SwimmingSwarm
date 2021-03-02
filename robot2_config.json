@@ -1,0 +1,24 @@
+{
+    "broker": {
+        "ip": "localhost",
+        "port": 1883
+    },
+    "connection_string": "/dev/serial/by-id/usb-ArduPilot_Pixhawk1_290053001451373232393438-if00",
+    "vehicle_mode": "MANUAL",
+    "node": {
+        "end_point": "robot2",
+        "links": {
+            "/state": {
+                "links": {},
+                "type": "STREAM"
+            }
+        },
+        "requests": [
+            {
+                "link": "controller/input2",
+                "type": "STREAM",
+                "required": false
+            }
+        ]
+    }
+}

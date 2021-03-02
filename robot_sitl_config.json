@@ -1,0 +1,23 @@
+{
+    "broker": {
+        "ip": "localhost",
+        "port": 1883
+    },
+    "vehicle_mode": "STABILIZE",
+    "node": {
+        "end_point": "robot_sitl",
+        "links": {
+            "/state": {
+                "links": {},
+                "type": "STREAM"
+            }
+        },
+        "requests": [
+            {
+                "link": "controller/input_sitl",
+                "type": "STREAM",
+                "required": false
+            }
+        ]
+    }
+}
