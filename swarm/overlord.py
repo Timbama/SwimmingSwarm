@@ -50,7 +50,7 @@ class Overlord:
     def handle_start(self):
         """
         You must implement this method to handle what happens
-        AFTER the MQTT node is started but BEFORE the event loop is started.
+        AFTER the MQTT node is started but BEFORE any message is received.
         """
         # pylint: disable=no-self-use
         return
@@ -58,8 +58,16 @@ class Overlord:
     def handle_message(self, link: str, msg):
         """
         You must implement this method to handle messages published by a robot.
+        If there are no messages, msg is an empty string.
         """
         # pylint: disable=unused-argument, no-self-use
+        return
+
+    def handle_round(self):
+        """
+        You must override this method to handle what happens
+        at the end of every round of message receiving.
+        """
         return
 
     def handle_stop(self):
@@ -75,14 +83,14 @@ class Overlord:
         Call this method to start the event loop for the MQTT client.
         """
         self.host_node.start()
-        self.handle_start()
 
-        logging.info("Publishable links %s", self.host_node.subscribable_links)
-
-        # Node
         for link in self.host_node.subscribable_links:  # set
             logging.info("Subscribing to %s", link)
             self.subscribables[link] = self.host_node.subscribe(link)  # queue
+
+        self.handle_start()
+
+        logging.info("Publishable links %s", self.host_node.publishable_links)
 
         self.active = True
         while self.active:
@@ -92,10 +100,11 @@ class Overlord:
                     msg = sub_queue.get_nowait()  # Get latest message
                     self.handle_message(link, msg)
                 except queue.Empty:
-                    continue
+                    self.handle_message(link, "")
                 except KeyboardInterrupt:
                     self.stop()
                     break
+            self.handle_round()
 
         self.handle_stop()
         self.host_node.stop()
@@ -110,6 +119,7 @@ class Overlord:
         """
         Publish a message through this link
         """
+        logging.info("Published message %s to link %s", message, link)
         self.host_node.publish(link, message)
 
     def publish_all(self, message: str):
