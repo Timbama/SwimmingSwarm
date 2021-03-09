@@ -1,7 +1,7 @@
 {
     "broker": {
         "ip": "localhost",
-        "port": 1883
+        "port": 1337
     },
     "node": {
         "end_point": "controller",
