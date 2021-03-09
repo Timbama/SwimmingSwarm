@@ -1,0 +1,28 @@
+{
+    "broker": {
+        "ip": "localhost",
+        "port": 1883
+    },
+    "node": {
+        "end_point": "controller",
+        "links": {
+            "/input_sim": {
+                "links": {},
+                "type": "STREAM"
+            }
+        },
+        "requests": [
+            {
+                "link": "robot_sim/state",
+                "type": "STREAM",
+                "required": false
+            }
+        ]
+    },
+    "bots": [
+        {
+            "sub_link": "robot_sim/state",
+            "pub_link": "controller/input_sim"
+        }
+    ]
+}
