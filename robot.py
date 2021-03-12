@@ -1,23 +1,22 @@
+import time
 import logging
 import json
 from argparse import ArgumentParser
 
-from swarm.drone import Drone, DroneSitl
+from swarm.drone.dronekit import DronekitDrone, DronekitSitlDrone
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
-class ManualDrone(Drone):
-    def handle_start(self):
-        pass
-
-    def handle_stop(self):
-        pass
-
+class ManualDrone(DronekitDrone):
     def handle_message(self, link: str, msg: str):
         """
         Execute MQTT message
         """
+        if msg == "":
+            time.sleep(0.1)
+            return
+
         logging.info("Received %s message from: %s", msg, link)
         state = json.loads(msg.decode())
         if state["alive"]:
@@ -29,19 +28,13 @@ class ManualDrone(Drone):
             speed = int(command[3])
             self.channel_command(pitch, roll, yaw, throttle=speed)
         else:
-            logging.info("Stopping...")
+            logging.info("Stopping drone")
             self.stop()
         self.publish_all(json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
 
 
-class ManualSitlDrone(DroneSitl):
-    def handle_start(self):
-        pass
-
-    def handle_stop(self):
-        pass
-
+class ManualSitlDrone(DronekitSitlDrone):
     def handle_message(self, link: str, msg: str):
         """
         Execute MQTT message
@@ -75,7 +68,18 @@ def main():
         bot = ManualSitlDrone.from_config(args.config, args.sitl_path)
     else:
         bot = ManualDrone.from_config(args.config)
+
+    # Wait for vehicle armable
+    bot.wait_vehicle_armable()
+    # Arm verhicle
+    bot.arm_vehicle()
+    state = {"alive": True}
+    # Send the initial condition
+    bot.publish_all(json.dumps(state, separators=(",", ":")))
     bot.start()
+    while bot.active:
+        bot.step()
+    bot.vehicle.close()
 
 
 if __name__ == "__main__":
