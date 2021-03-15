@@ -1,8 +1,9 @@
 import logging
 import json
 from argparse import ArgumentParser
+from typing import Dict
 
-from swarm.overlord import Overlord
+from swarm import VizierAgent
 
 import pyGui
 
@@ -15,7 +16,7 @@ def main():
     parser.add_argument("configuration", type=str, help=".json configuration file")
     parser.add_argument(
         "-mode",
-        choices=["auto", "keyboard", "joystick"],
+        choices=["keyboard", "joystick"],
         help="control mode: auto, keyboard or joystick",
     )
     args = parser.parse_args()
@@ -27,33 +28,42 @@ def main():
         overlord = ManualOverlord.from_config(args.configuration, args.mode, gui)
         gui.render()
         overlord.start()
+        while overlord.active:
+            overlord.step()
+            gui.render()
         gui.stop()
 
-    elif args.mode == "auto":
-        overlord = AutoOverlord.from_config(args.configuration)
-        overlord.start()
 
-
-class ManualOverlord(Overlord):
+class ManualOverlord(VizierAgent):
     def __init__(
         self,
+        broker_ip: str,
+        broker_port: int,
+        node_descriptor: Dict,
+        input_mode: str,
+        bots: Dict,
+        gui: pyGui.Gui,
     ):
-        super().__init__()
-        self.mode = None
-        self.gui = None
+        super().__init__(broker_ip, broker_port, node_descriptor)
+        self.input_mode = input_mode
         self.sub_to_pub = {}
+        for bot in bots:
+            # pylint: disable=no-member
+            self.sub_to_pub[bot["sub_link"]] = bot["pub_link"]
+        self.gui = gui
 
     @classmethod
-    def from_config(cls, path: str, mode: str, gui: pyGui.Gui):
+    def from_config(cls, path: str, input_mode: str, gui: pyGui.Gui):
         # pylint: disable=arguments-differ
-        overlord = super().from_config(path)
-        overlord.mode = mode
-        overlord.gui = gui
         with open(path, "r") as file:
             configuration = json.load(file)
-            for bot in configuration["bots"]:
-                # pylint: disable=no-member
-                overlord.sub_to_pub[bot["sub_link"]] = bot["pub_link"]
+            broker_ip = configuration["broker"]["ip"]
+            broker_port = configuration["broker"]["port"]
+            node_descriptor = configuration["node"]
+            bots = configuration["bots"]
+            overlord = cls(
+                broker_ip, broker_port, node_descriptor, input_mode, bots, gui
+            )
         return overlord
 
     def handle_message(self, link: str, msg: str):
@@ -67,15 +77,18 @@ class ManualOverlord(Overlord):
             self.stop()
             return
 
+        state = {"alive": True}
         if self.gui.has_quit():
             state["alive"] = False
             self.stop()
         else:
             command = None
-            if self.mode == "joystick":
+            if self.input_mode == "joystick":
                 command = self.gui.get_joystick_axis()
-            elif self.mode == "keyboard":
+            elif self.input_mode == "keyboard":
                 command = self.gui.get_keyboard_command()
+            else:
+                raise RuntimeError("Unrecognized input mode")
             command = (
                 pwm(-command[0]),
                 pwm(-command[1]),
@@ -86,40 +99,6 @@ class ManualOverlord(Overlord):
 
         pub_link = self.sub_to_pub[link]
         self.publish(pub_link, json.dumps(state, separators=(",", ":")))
-        logging.info("Published to %s message: %s", link, state)
-
-    def handle_round(self):
-        self.gui.render()
-
-
-class AutoOverlord(Overlord):
-    def __init__(
-        self,
-    ):
-        super().__init__()
-        self.mode = None
-        self.gui = None
-        self.sub_to_pub = {}
-
-    @classmethod
-    def from_config(cls, path: str):
-        # pylint: disable=arguments-differ
-        overlord = super().from_config(path)
-        with open(path, "r") as file:
-            configuration = json.load(file)
-            for bot in configuration["bots"]:
-                # pylint: disable=no-member
-                overlord.sub_to_pub[bot["sub_link"]] = bot["pub_link"]
-        return overlord
-
-    def handle_message(self, link: str, msg: str):
-        state = json.loads(msg.decode(encoding="UTF-8"))
-        if not state["alive"]:
-            self.stop()
-            return
-        command = {"lat": 1, "lon": 1, "alt": 1}
-        state["command"] = command
-        self.publish(link, json.dumps(state, separators=(",", ":")))
 
 
 def pwm(value):

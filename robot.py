@@ -3,7 +3,7 @@ import logging
 import json
 from argparse import ArgumentParser
 
-from swarm.drone.dronekit import DronekitDrone, DronekitSitlDrone
+from swarm.drone.ardusub import DronekitDrone, DronekitSitlDrone
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,6 +30,7 @@ class ManualDrone(DronekitDrone):
         else:
             logging.info("Stopping drone")
             self.stop()
+        state = {"alive": True}
         self.publish_all(json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
 
@@ -52,6 +53,7 @@ class ManualSitlDrone(DronekitSitlDrone):
         else:
             logging.info("Stopping...")
             self.stop()
+        state = {"alive": True}
         self.publish_all(json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
 
@@ -70,7 +72,8 @@ def main():
         bot = ManualDrone.from_config(args.config)
 
     # Wait for vehicle armable
-    bot.wait_vehicle_armable()
+
+    # bot.wait_vehicle_armable() #Maybe not. It always stops here
     # Arm verhicle
     bot.arm_vehicle()
     state = {"alive": True}
