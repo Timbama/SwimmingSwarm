@@ -48,15 +48,20 @@ class Gui:
             TABS_first_part.append('Manual ' + str(i))
         TABS = TABS_first_part + TABS
 
-
+        self.bot_list = bots
+        self.num_bots = len(bots)
         # Set up state
         self.tabState = TABS[0]
         self.guidedState = None
         self.guided_environment_range = (None, None, None, None)
-        self.current_goal_pos = []
-        #for bot in bots:
-         #   self.current_goal_pos.append((bot[1], bot[2]))
-        self.bot_list = bots
+
+        #need to make this a dictionary with the key being bots
+        #bots are mutable, key must be immutable
+        list_num_bots = list(range(self.num_bots))
+        self.current_goal_pos = dict.fromkeys(list_num_bots, None)
+
+
+
 
 
         # Used to manage how fast the screen updates
@@ -166,11 +171,15 @@ class Gui:
         ystart = self.guided_environment_range[1]
         yend = self.guided_environment_range[1] + self.guided_environment_range[3]
         if self.guidedState is not None:
+            stateNum = self.bot_list.index(self.guidedState)
             if xend > mouse[0] > xstart and yend > mouse[1] > ystart:
                 if click[0] == 1:
                     x = mouse[0] - xstart
                     y = mouse[1] - ystart
-                    self.current_goal_pos.append((x,y))
+                    if self.current_goal_pos[stateNum] is None:
+                        self.current_goal_pos[stateNum] = [(x,y)]
+                    else:
+                        self.current_goal_pos[stateNum].append((x,y))
                     #self.current_goal_pos[self.bot_list.index(self.guidedState)].append((x,y))
                     #print(self.current_goal_pos)
 
@@ -180,9 +189,11 @@ class Gui:
         w, h = text.get_rect().width, text.get_rect().height
         xstart = self.guided_environment_range[0]
         ystart = self.guided_environment_range[1]
-        if len(self.current_goal_pos) is not 0:
-            for pos in self.current_goal_pos:
-                self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
+        for key, list_of_pos in self.current_goal_pos.items():
+            if list_of_pos is not None:
+                for pos in list_of_pos:
+                    print(pos)
+                    self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
 
 
         #else:
