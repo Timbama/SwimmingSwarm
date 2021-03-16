@@ -12,6 +12,7 @@ TEST_GUIDED_COMMAND = {
     "lat": -1,
     "lon": -1, 
 }
+logging.basicConfig(level=logging.INFO)
 
 
 def main():
@@ -74,6 +75,9 @@ class ManualOverlord(Overlord):
         return overlord
 
     def handle_message(self, link: str, msg: str):
+        if msg == "":
+            return
+
         logging.info("Received %s message from: %s", msg, link)
 
         state = json.loads(msg.decode())
@@ -85,7 +89,6 @@ class ManualOverlord(Overlord):
             state["alive"] = False
             self.stop()
         else:
-            self.gui.render()
             command = None
             if self.mode == "joystick":
                 command = self.gui.get_joystick_axis()
@@ -102,6 +105,9 @@ class ManualOverlord(Overlord):
         pub_link = self.sub_to_pub[link]
         self.publish(pub_link, json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
+
+    def handle_round(self):
+        self.gui.render()
 
 
 class AutoOverlord(Overlord):
