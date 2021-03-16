@@ -14,6 +14,8 @@ BLUE      = (   0,   0, 255)
 CYAN      = (   0, 255, 255)
 GREY      = ( 192, 192, 192)
 DARK_GREY = ( 140, 140, 140)
+LIGHT_BLUE= (200, 230, 232)
+PINK      = (252, 146, 238)
 
 SCRN_WIDTH  = 800
 SCRN_HEIGHT = 600
@@ -49,11 +51,11 @@ class Gui:
 
         # Set up state
         self.tabState = TABS[0]
-        self.bots = [
-            ['bot_id', 'location'],
-            ['bot_id', 'location']
-        ]
-
+        self.guidedState = None
+        self.guided_environment_range = (None, None, None, None)
+        self.current_goal_pos = []
+        #for bot in bots:
+         #   self.current_goal_pos.append((bot[1], bot[2]))
         self.bot_list = bots
 
 
@@ -121,31 +123,101 @@ class Gui:
         self.screen.blit(myfont.render('Yaw', True, BLACK),(380,480))
         self.screen.blit(myfont.render('Pitch', True, BLACK),(665,110))
         self.screen.blit(myfont.render('Roll', True, BLACK),(380,30))
-        
+
+    #this should probably get renamed
     def draw_bot_list(self):
         font = pygame.font.SysFont('Arial', 16)
-        pygame.draw.rect(self.screen, DARK_GREY, [98, 98, 604, 384])
-        pygame.draw.rect(self.screen, WHITE, [100, 100, 600, 380])
-        self.screen.blit(font.render('Bot ID | Current Location', True, BLACK), (105, 80))
-        for x in range(len(self.bots)):
-            self.screen.blit(font.render(self.bots[x][0], True, BLACK), (105, 105 + (x*20)))
+        pygame.draw.rect(self.screen, DARK_GREY, [98, 68, 604, 444])
+        pygame.draw.rect(self.screen, WHITE, [100, 70, 600, 440])
+        pygame.draw.rect(self.screen, DARK_GREY, [98, 350, 604, 2])
+        self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
+        for i in range(len(self.bot_list)):
+            if self.guidedState == self.bot_list[i]:
+                color = GREEN
+            else: color = GREY
+            pygame.draw.rect(self.screen, BLACK, [101, 375 + 24 * i, 62, 20], border_radius=2)
+            self.button('Bot ' + str(i), 102, 376 + 24 * i, 60, 18, color, DARK_GREY, font, self.toggle_guided_state, i, br=2)
+            save_i = i + 1
+        pygame.draw.rect(self.screen, BLACK, [101, 375 + 24 * save_i, 117, 20], border_radius=2)
+        self.button('Clear Selection', 102, 376 + 24 * save_i, 115, 18, GREY, DARK_GREY, font, self.toggle_guided_state, -1,
+                    br=2)
+
+
+    def draw_bot_environment(self):
+        pygame.draw.rect(self.screen, LIGHT_BLUE, [261, 70, 280, 280])
+        self.guided_environment_range = (261, 70, 280, 280)
+        for bot in self.bot_list:
+            x = bot[1]
+            y = bot[2]
+            if self.guidedState == bot:
+                pygame.draw.circle(self.screen, RED, (261 + x, 70 + y), 4)
+            pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3)
+        self.get_guided_goal_pos()
+        self.draw_goal_pos()
+            #below can be used to include color coding
+            #pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3, draw_top_right=True, draw_bottom_right=True)
+            #pygame.draw.circle(self.screen, CYAN, (261 + x, 70 + y), 3, draw_top_left=True, draw_bottom_left=True)
+
+    def get_guided_goal_pos(self):
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        xstart = self.guided_environment_range[0]
+        xend = self.guided_environment_range[0] + self.guided_environment_range[2]
+        ystart = self.guided_environment_range[1]
+        yend = self.guided_environment_range[1] + self.guided_environment_range[3]
+        if self.guidedState is not None:
+            if xend > mouse[0] > xstart and yend > mouse[1] > ystart:
+                if click[0] == 1:
+                    x = mouse[0] - xstart
+                    y = mouse[1] - ystart
+                    self.current_goal_pos.append((x,y))
+                    #self.current_goal_pos[self.bot_list.index(self.guidedState)].append((x,y))
+                    #print(self.current_goal_pos)
+
+    def draw_goal_pos(self):
+        font = pygame.font.SysFont('Arial', 16)
+        text = font.render('X', True, RED)
+        w, h = text.get_rect().width, text.get_rect().height
+        xstart = self.guided_environment_range[0]
+        ystart = self.guided_environment_range[1]
+        if len(self.current_goal_pos) is not 0:
+            for pos in self.current_goal_pos:
+                self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
+
+
+        #else:
+         #   pygame.draw.rect(self.screen, ic,(x,y,w,h),0,br)
+
+        #if (xstart < x < xend & ystart < y < yend):
+         #   text = font.render('X', True, RED)
+          #  w, h = text.get_rect().width, text.get_rect().height
+           # self.screen.blit(text, (x - w/2, y - h/2))
+           # self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
+
+
 
     def draw_menubar(self):
         menuFont = pygame.font.SysFont('Arial', 12)
         pygame.draw.rect(self.screen, DARK_GREY, [0, 0, SCRN_WIDTH, 22])
-        manual_color = GREY
-        guided_color = GREY
-        if self.tabState == TABS[len(self.bot_list)]:
-            guided_color = GREEN
-        else:
-            manual_color = GREEN
-        #self.button('Manual', 2, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, 0) - replaced this with the loop loop below
-        final_i = 0
+
+
+        selected_color = GREEN
+        unselected_color = GREY
         for i in range(len(self.bot_list)):
-            self.button('Manual ' + str(i), 2 + 62 * i, 2, 60, 18, manual_color, DARK_GREY, menuFont, self.toggle_tab_state, i)
+            if self.tabState == TABS[i]:
+                current_color = selected_color
+            else: current_color = unselected_color
+            self.button('Manual ' + str(i), 2 + 62 * i, 2, 60, 18, current_color, DARK_GREY, menuFont,
+                        self.toggle_tab_state, i)
             final_i = i
-        self.button('Guided', 2 + 62 *(final_i + 1), 2, 60, 18, guided_color, DARK_GREY, menuFont, self.toggle_tab_state, len(self.bot_list))
+        if self.tabState == TABS[len(self.bot_list)]:
+            self.button('Guided', 2 + 62 * (final_i + 1), 2, 60, 18, selected_color, DARK_GREY, menuFont,
+                        self.toggle_tab_state, len(self.bot_list))
+        else: self.button('Guided', 2 + 62 * (final_i + 1), 2, 60, 18, unselected_color, DARK_GREY, menuFont,
+                        self.toggle_tab_state, len(self.bot_list))
         self.button('Quit', 738, 2, 60, 18, GREY, DARK_GREY, menuFont, self.stop)
+
+
 
     def draw_selected_bot(self):
         font = pygame.font.SysFont('Arial', 16)
@@ -198,16 +270,16 @@ class Gui:
 
         return commands
     
-    def button(self, msg, x, y, w, h, ic, ac, font, action=None, *args): # ic: inactive color, ac: active color
+    def button(self, msg, x, y, w, h, ic, ac, font, action=None, *args, br=0): # ic: inactive color, ac: active color, br = border radius (rounded edges)
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
 
         if x+w > mouse[0] > x and y+h > mouse[1] > y:
-            pygame.draw.rect(self.screen, ac,(x,y,w,h))
+            pygame.draw.rect(self.screen, ac,(x,y,w,h),0,br)
             if click[0] == 1 and action != None:
                 action(*args)
         else:
-            pygame.draw.rect(self.screen, ic,(x,y,w,h))
+            pygame.draw.rect(self.screen, ic,(x,y,w,h),0,br)
 
         textSurf, textRect = text_objects(msg, font)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
@@ -220,6 +292,15 @@ class Gui:
 
         if self.tabState == TABS[len(self.bot_list)]:
             self.draw_bot_list()
+            self.draw_bot_environment()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pos = event.pos
+                    print(pos)
+                    self.get_guided_goal_pos()
+                elif event.type == pygame.QUIT:
+                    quit()
+
         else:
             if self.hasJoystick:
                 (pitch, roll, yaw, throttle) = self.get_joystick_axis()
@@ -252,6 +333,14 @@ class Gui:
                 selected_bot = 2
         else:
             selected_bot = len(self.bot_list) #if you're on the guided tab the value returned is 1 past the final bot value
+
+    def toggle_guided_state(self, idx):
+        print(idx)
+        if (idx == -1):
+            self.guidedState = None
+        else:
+            self.guidedState = self.bot_list[idx]
+
     
     def has_quit(self):
         for event in pygame.event.get():
