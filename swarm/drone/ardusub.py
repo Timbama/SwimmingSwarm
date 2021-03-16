@@ -8,19 +8,17 @@ import time
 from typing import Dict
 
 from dronekit import connect, VehicleMode
-
 from dronekit_sitl import SITL
 
-from . import Drone
+from swarm import VizierAgent
 
 
-class DronekitDrone(Drone):
+class DronekitDrone(VizierAgent):
     """
-    To use this class, you must override handle_start, handle_armed, handle_message and handle_stop.
+    To use this class, you must override handle_message.
     Then, create this class either through new() or from_config().
-    DO NOT use __init__().
-    Finally, run start(). stop() must be arranged to
-    be called else start() will block forever
+    Finally, run start(), then step() in succession. stop() can be called
+    so that the Vizier is stopped and further call to step() will do nothing.
     """
 
     @classmethod
@@ -36,17 +34,21 @@ class DronekitDrone(Drone):
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
             drone = cls(
-                connection_string, vehicle_mode, broker_ip, broker_port, node_descriptor
+                broker_ip,
+                broker_port,
+                node_descriptor,
+                connection_string,
+                vehicle_mode,
             )
             return drone
 
     def __init__(
         self,
-        connection_string: str,
-        vehicle_mode: str,
         broker_ip: str,
         broker_port: int,
         node_descriptor: Dict,
+        connection_string: str,
+        vehicle_mode: str,
     ):
         super().__init__(broker_ip, broker_port, node_descriptor)
         self.vehicle = connect(connection_string, wait_ready=True, baud=57600)
@@ -78,8 +80,8 @@ class DronekitDrone(Drone):
         There are some problem with this check when testing without batteries, needs more investigation
         """
         logging.info("Basic pre-arm checks")
-        # while not self.vehicle.is_armable:
-        #    time.sleep(1)
+        while not self.vehicle.is_armable:
+            time.sleep(1)
         logging.info("Pre-arm checks complete")
 
     def channel_command(self, pitch: int, roll: int, yaw: int, throttle: int):
@@ -117,20 +119,20 @@ class DronekitSitlDrone(DronekitDrone):
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
             return cls(
-                sitl,
-                vehicle_mode,
                 broker_ip,
                 broker_port,
                 node_descriptor,
+                sitl,
+                vehicle_mode,
             )
 
     def __init__(
         self,
-        sitl: SITL,
-        vehicle_mode: str,
         broker_ip: str,
         broker_port: int,
         node_descriptor: Dict,
+        sitl: SITL,
+        vehicle_mode: str,
     ):
         self.sitl = sitl
         super().__init__(

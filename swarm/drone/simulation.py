@@ -3,7 +3,10 @@ from typing import Dict, Tuple
 
 import pymunk
 import pymunk.pygame_util
-from . import Drone
+from heapdict import heapdict
+
+# pylint: disable=import-error
+from swarm import VizierAgent
 
 
 def initialize_space(size=(600, 600)):
@@ -22,15 +25,15 @@ def initialize_space(size=(600, 600)):
     return space
 
 
-class SimulatedDrone(Drone):
+class SimulatedDrone(VizierAgent):
     def __init__(
         self,
-        space: pymunk.Space,
-        position: Tuple[float, float],
-        rotation: float,
         broker_ip: str,
         broker_port: int,
         node_descriptor: Dict,
+        space: pymunk.Space,
+        position: Tuple[float, float],
+        rotation: float,
     ):
         super().__init__(broker_ip, broker_port, node_descriptor)
         self.body_drag_coefficient = 0.47  # drag coefficient of a sphere
@@ -44,7 +47,37 @@ class SimulatedDrone(Drone):
         self.vehicle = self.add_to_space(position, rotation)
 
         self.side_motor_position = self.body_radius + self.side_motor_width / 2
-        self.side_motor_force = (0, 10)
+        self.max_motor_force = 100
+        self.motor_force = (0, 0)
+
+        self.motor_force_queue = heapdict()
+
+        self.clock = 0
+
+    def step(self, dt):
+        try:
+            time, motor_force = self.motor_force_queue.peekitem()
+            if time <= self.clock:
+                self.motor_force_queue.popitem()
+                self.motor_force = motor_force
+        except:
+            pass
+        # Newly received commands have higher priority
+        super().step()
+        left_force_N, right_force_N = self.motor_force
+        self.vehicle.apply_force_at_local_point(
+            (0, left_force_N), (-self.side_motor_position, 0)
+        )
+        self.vehicle.apply_force_at_local_point(
+            (0, right_force_N), (self.side_motor_position, 0)
+        )
+        self.clock += dt
+
+    def get_position(self):
+        return (self.vehicle.position.x, self.vehicle.position.y)
+
+    def get_orientation(self):
+        return self.vehicle.angle
 
     def add_to_space(self, position: Tuple[float, float], rotation: float):
         vehicle = pymunk.Body()  # 1
@@ -56,26 +89,33 @@ class SimulatedDrone(Drone):
         body.mass = self.body_mass  # 4
         body.friction = 1  # Asumme no surface friction
 
-        left_motor = pymunk.Segment(
+        left_motor = pymunk.Poly(
             vehicle,
-            (-self.body_radius, 0),
-            (
-                -self.body_radius - self.side_motor_width + self.side_motor_length / 2,
-                0,
+            [
+                (self.side_motor_width / 2, self.side_motor_length / 2),
+                (self.side_motor_width / 2, -self.side_motor_length / 2),
+                (-self.side_motor_width / 2, -self.side_motor_length / 2),
+                (-self.side_motor_width / 2, self.side_motor_length / 2),
+            ],
+            transform=pymunk.Transform(
+                tx=self.body_radius + self.side_motor_length / 2
             ),
-            self.side_motor_length / 2,
+            radius=0.001,
         )
         left_motor.mass = self.side_motor_mass
         left_motor.friction = 1
-
-        right_motor = pymunk.Segment(
+        right_motor = pymunk.Poly(
             vehicle,
-            (self.body_radius, 0),
-            (
-                self.body_radius + self.side_motor_width - self.side_motor_length / 2,
-                0,
+            [
+                (self.side_motor_width / 2, self.side_motor_length / 2),
+                (self.side_motor_width / 2, -self.side_motor_length / 2),
+                (-self.side_motor_width / 2, -self.side_motor_length / 2),
+                (-self.side_motor_width / 2, self.side_motor_length / 2),
+            ],
+            transform=pymunk.Transform(
+                tx=-self.body_radius - self.side_motor_length / 2
             ),
-            self.side_motor_length / 2,
+            radius=0.001,
         )
         right_motor.mass = self.side_motor_mass
         right_motor.friction = 1
@@ -83,10 +123,7 @@ class SimulatedDrone(Drone):
         self.space.add(vehicle, body, left_motor, right_motor)
         return vehicle
 
-    def drag_callback(
-        self, body: pymunk.Body, gravity: Tuple[float, float], damping: float, dt: float
-    ):
-        pymunk.Body.update_velocity(body, gravity, damping, dt)
+    def body_drag(self, body: pymunk.Body):
         # General drag equations
         radius = self.body_radius / 100  # m
         velocity = body.velocity / 100  # m
@@ -96,17 +133,25 @@ class SimulatedDrone(Drone):
         )
         x_force = constant * velocity[0] * velocity[0]  # N
         y_force = constant * velocity[1] * velocity[1]  # N
+        return pymunk.Vec2d(x_force, y_force)
+
+    def drag_callback(
+        self, body: pymunk.Body, gravity: Tuple[float, float], damping: float, dt: float
+    ):
+        pymunk.Body.update_velocity(body, gravity, damping, dt)
         # F = ma
-        a = pymunk.Vec2d(x_force, y_force) / body.mass  # m/s^2
-        a *= 100  # cm/s^2
-        body.velocity -= a * dt
+        acceleration = self.body_drag(body) / body.mass  # m/s^2
+        acceleration *= 100  # cm/s^2
+        body.velocity -= acceleration * dt
 
-    def pulse_left_motor(self):
-        self.vehicle.apply_force_at_local_point(
-            self.side_motor_force, (-self.side_motor_position, 0)
-        )
+    def set_velocity(self, velocity_m_s: Tuple[float, float]):
+        pass
 
-    def pulse_right_motor(self):
-        self.vehicle.apply_force_at_local_point(
-            self.side_motor_force, (self.side_motor_position, 0)
-        )
+    def set_angular_velocity(self, velocity_m_s: Tuple[float, float]):
+        pass
+
+    def set_linear_velocity(self, velocity_m_s: Tuple[float, float]):
+        pass
+
+    def set_motor_force(self, left_force_N: float, right_force_N: float):
+        self.motor_force = (left_force_N, right_force_N)
