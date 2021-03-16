@@ -14,8 +14,10 @@ BLUE      = (   0,   0, 255)
 CYAN      = (   0, 255, 255)
 GREY      = ( 192, 192, 192)
 DARK_GREY = ( 140, 140, 140)
-LIGHT_BLUE= (200, 230, 232)
-PINK      = (252, 146, 238)
+LIGHT_BLUE= ( 200, 230, 232)
+PINK      = ( 252, 146, 238)
+DARK_GREEN= (   0,  87,  47)
+TECH_GOLD = ( 179, 163, 105)
 
 SCRN_WIDTH  = 800
 SCRN_HEIGHT = 600
@@ -185,14 +187,24 @@ class Gui:
 
     def draw_goal_pos(self):
         font = pygame.font.SysFont('Arial', 16)
-        text = font.render('X', True, RED)
-        w, h = text.get_rect().width, text.get_rect().height
+        symbols = ['X', 'O', '+', '*', '@', '#']
+        colors = [RED, BLUE, TECH_GOLD, PINK, WHITE, DARK_GREEN]
         xstart = self.guided_environment_range[0]
         ystart = self.guided_environment_range[1]
+
+
+        i = -1
+        j = 0
         for key, list_of_pos in self.current_goal_pos.items():
+            i += 1
+            if i > 6:
+                j +=1
+                i=0
+            text = font.render(symbols[i], True, colors[i + j])
+            w, h = text.get_rect().width, text.get_rect().height
             if list_of_pos is not None:
                 for pos in list_of_pos:
-                    print(pos)
+                    #print(pos)
                     self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
 
 
@@ -307,7 +319,7 @@ class Gui:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP:
                     pos = event.pos
-                    print(pos)
+                    #print(pos)
                     self.get_guided_goal_pos()
                 elif event.type == pygame.QUIT:
                     quit()
