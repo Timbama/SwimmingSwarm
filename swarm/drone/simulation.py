@@ -144,4 +144,12 @@ class SimulatedDrone(VizierAgent):
         pass
 
     def set_motor_force(self, left_force_N: float, right_force_N: float):
+        if left_force_N > 0:
+            left_force_N = min(left_force_N, self.max_motor_force)
+        elif left_force_N < 0:
+            left_force_N = max(left_force_N, -self.max_motor_force)
+        if right_force_N > 0:
+            right_force_N = min(right_force_N, self.max_motor_force)
+        elif right_force_N < 0:
+            right_force_N = max(right_force_N, -self.max_motor_force)
         self.motor_force = (left_force_N, right_force_N)
