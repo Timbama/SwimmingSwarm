@@ -82,7 +82,7 @@ class SimulatedDrone(VizierAgent):
     def add_to_space(self, position: Tuple[float, float], rotation: float):
         vehicle = pymunk.Body()  # 1
         vehicle.position = position  # 2
-        vehicle.angle = 0
+        vehicle.angle = rotation
         vehicle.velocity_func = self.drag_callback
 
         body = pymunk.Circle(vehicle, self.body_radius)  # 3
