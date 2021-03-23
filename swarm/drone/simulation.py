@@ -47,7 +47,7 @@ class SimulatedDrone(VizierAgent):
         self.vehicle = self.add_to_space(position, rotation)
 
         self.side_motor_position = self.body_radius + self.side_motor_width / 2
-        self.max_motor_force = 100
+        self.max_motor_force = 10
         self.motor_force = (0, 0)
 
         self.motor_force_queue = heapdict()
@@ -66,10 +66,10 @@ class SimulatedDrone(VizierAgent):
         super().step()
         left_force_N, right_force_N = self.motor_force
         self.vehicle.apply_force_at_local_point(
-            (0, left_force_N), (-self.side_motor_position, 0)
+            (left_force_N, 0), (0, self.side_motor_position)
         )
         self.vehicle.apply_force_at_local_point(
-            (0, right_force_N), (self.side_motor_position, 0)
+            (right_force_N, 0), (0, -self.side_motor_position)
         )
         self.clock += dt
 
@@ -77,7 +77,7 @@ class SimulatedDrone(VizierAgent):
         return (self.vehicle.position.x, self.vehicle.position.y)
 
     def get_orientation(self):
-        return self.vehicle.angle
+        return self.vehicle.angle % (2 * math.pi)
 
     def add_to_space(self, position: Tuple[float, float], rotation: float):
         vehicle = pymunk.Body()  # 1
@@ -92,13 +92,13 @@ class SimulatedDrone(VizierAgent):
         left_motor = pymunk.Poly(
             vehicle,
             [
-                (self.side_motor_width / 2, self.side_motor_length / 2),
-                (self.side_motor_width / 2, -self.side_motor_length / 2),
-                (-self.side_motor_width / 2, -self.side_motor_length / 2),
-                (-self.side_motor_width / 2, self.side_motor_length / 2),
+                (self.side_motor_length / 2, self.side_motor_width / 2),
+                (-self.side_motor_length / 2, self.side_motor_width / 2),
+                (-self.side_motor_length / 2, -self.side_motor_width / 2),
+                (self.side_motor_length / 2, -self.side_motor_width / 2),
             ],
             transform=pymunk.Transform(
-                tx=self.body_radius + self.side_motor_length / 2
+                ty=self.body_radius + self.side_motor_length / 2
             ),
             radius=0.001,
         )
@@ -107,13 +107,13 @@ class SimulatedDrone(VizierAgent):
         right_motor = pymunk.Poly(
             vehicle,
             [
-                (self.side_motor_width / 2, self.side_motor_length / 2),
-                (self.side_motor_width / 2, -self.side_motor_length / 2),
-                (-self.side_motor_width / 2, -self.side_motor_length / 2),
-                (-self.side_motor_width / 2, self.side_motor_length / 2),
+                (self.side_motor_length / 2, self.side_motor_width / 2),
+                (-self.side_motor_length / 2, self.side_motor_width / 2),
+                (-self.side_motor_length / 2, -self.side_motor_width / 2),
+                (self.side_motor_length / 2, -self.side_motor_width / 2),
             ],
             transform=pymunk.Transform(
-                tx=-self.body_radius - self.side_motor_length / 2
+                ty=-self.body_radius - self.side_motor_length / 2
             ),
             radius=0.001,
         )
@@ -147,10 +147,10 @@ class SimulatedDrone(VizierAgent):
     def set_velocity(self, velocity_m_s: Tuple[float, float]):
         pass
 
-    def set_angular_velocity(self, velocity_m_s: Tuple[float, float]):
+    def set_angular_velocity(self, velocity_rad_s: Tuple[float, float]):
         pass
 
-    def set_linear_velocity(self, velocity_m_s: Tuple[float, float]):
+    def set_linear_velocity(self, velocity_m_s: float):
         pass
 
     def set_motor_force(self, left_force_N: float, right_force_N: float):
