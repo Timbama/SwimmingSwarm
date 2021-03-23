@@ -3,7 +3,6 @@ from typing import Dict, Tuple
 
 import pymunk
 import pymunk.pygame_util
-from heapdict import heapdict
 
 # pylint: disable=import-error
 from swarm import VizierAgent
@@ -50,18 +49,9 @@ class SimulatedDrone(VizierAgent):
         self.max_motor_force = 10
         self.motor_force = (0, 0)
 
-        self.motor_force_queue = heapdict()
-
         self.clock = 0
 
     def step(self, dt):
-        try:
-            time, motor_force = self.motor_force_queue.peekitem()
-            if time <= self.clock:
-                self.motor_force_queue.popitem()
-                self.motor_force = motor_force
-        except:
-            pass
         # Newly received commands have higher priority
         super().step()
         left_force_N, right_force_N = self.motor_force
@@ -154,4 +144,12 @@ class SimulatedDrone(VizierAgent):
         pass
 
     def set_motor_force(self, left_force_N: float, right_force_N: float):
+        if left_force_N > 0:
+            left_force_N = min(left_force_N, self.max_motor_force)
+        elif left_force_N < 0:
+            left_force_N = max(left_force_N, -self.max_motor_force)
+        if right_force_N > 0:
+            right_force_N = min(right_force_N, self.max_motor_force)
+        elif right_force_N < 0:
+            right_force_N = max(right_force_N, -self.max_motor_force)
         self.motor_force = (left_force_N, right_force_N)

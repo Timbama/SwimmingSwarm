@@ -1,0 +1,16 @@
+cffi==1.14.5
+dronekit==2.9.2
+future==0.18.2
+graphviz==0.16
+lxml==4.6.3
+monotonic==1.5
+numpy==1.20.1
+paho-mqtt==1.5.1
+pycparser==2.20
+pygame==2.0.1
+pymavlink==2.4.14
+pymunk==6.0.0
+torch==1.8.0
+typing-extensions==3.7.4.3
+wheel==0.36.2
+git+git://github.com/robotarium/vizier@master
