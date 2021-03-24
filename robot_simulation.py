@@ -139,7 +139,6 @@ def main():
     pygame.init()
 
     screen = pygame.display.set_mode((600, 600))
-    pygame.display.set_caption("Single bot simulation")
     clock = pygame.time.Clock()
     draw_options = pymunk.pygame_util.DrawOptions(screen)
     logging.info("Simulation initialized")
@@ -149,6 +148,7 @@ def main():
     dt = 1.0 / fps
     drone = None
     if args.mode == "manual":
+        pygame.display.set_caption("Manual bot simulation")
         drone = ManualSimulatedDrone.from_config(space, (300, 300), 0, args.config, dt)
         state = {"alive": True}
         # Send the initial condition
@@ -178,6 +178,7 @@ def main():
             clock.tick(fps)
 
     elif args.mode == "auto":
+        pygame.display.set_caption("Auto bot simulation")
         drone1 = AutoSimulatedDrone.from_config(space, (300, 200), 0, args.config, dt)
         drone2 = AutoSimulatedDrone.from_config(
             space, (300, 400), -math.pi, args.config, dt

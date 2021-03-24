@@ -207,6 +207,10 @@ class SimulatedDrone(VizierAgent):
         self, target_orientation: float, wait: float = 0, chain: bool = False
     ):
         turn_angle = target_orientation - self.get_orientation()
+        if turn_angle > math.pi:
+            turn_angle = turn_angle - 2 * math.pi
+        elif turn_angle < -math.pi:
+            turn_angle = turn_angle + 2 * math.pi
         if turn_angle != 0:
             turn_time = self.calculate_turn_time(turn_angle, self.max_motor_force)
             achievable_time = 2 * (
