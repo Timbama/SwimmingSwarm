@@ -1,8 +1,10 @@
 import json
 import logging
+import math
 import sys
 from argparse import ArgumentParser
 from typing import Tuple
+
 
 import pymunk
 import pygame
@@ -19,6 +21,7 @@ class AutoSimulatedDrone(simulation.SimulatedDrone):
         position: Tuple[float, float],
         rotation: float,
         path: str,
+        dt: float,
     ):
         """
         Create new Drone from a configuration file.
@@ -29,12 +32,7 @@ class AutoSimulatedDrone(simulation.SimulatedDrone):
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
             drone = cls(
-                broker_ip,
-                broker_port,
-                node_descriptor,
-                space,
-                position,
-                rotation,
+                broker_ip, broker_port, node_descriptor, space, position, rotation, dt
             )
             return drone
 
@@ -47,13 +45,12 @@ class AutoSimulatedDrone(simulation.SimulatedDrone):
 
         logging.info("Received %s message from: %s", msg, link)
         state = json.loads(msg.decode())
+        wait = 0
         if state["alive"]:
-            if "command" in state:
-                command = state["command"]
-                logging.info("New command %s", command)
-                linear_velocity = command["velocity"]["linear"]
-                angular_velocity = command["velocity"]["angular"]
-                self.set_motor_force(left_force, right_force)
+            if "waypoint" in state:
+                waypoint = state["waypoint"]
+                logging.info("New waypoint %s", waypoint)
+                wait = self.go_to_waypoint(waypoint)
         else:
             logging.info("Stopping...")
             self.stop()
@@ -61,6 +58,7 @@ class AutoSimulatedDrone(simulation.SimulatedDrone):
             "alive": True,
             "position": self.get_position(),
             "orientation": self.get_orientation(),
+            "wait": wait,
         }
         self.publish_all(json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
@@ -74,6 +72,7 @@ class ManualSimulatedDrone(simulation.SimulatedDrone):
         position: Tuple[float, float],
         rotation: float,
         path: str,
+        dt: float,
     ):
         """
         Create new Drone from a configuration file.
@@ -84,12 +83,7 @@ class ManualSimulatedDrone(simulation.SimulatedDrone):
             broker_port = configuration["broker"]["port"]
             node_descriptor = configuration["node"]
             drone = cls(
-                broker_ip,
-                broker_port,
-                node_descriptor,
-                space,
-                position,
-                rotation,
+                broker_ip, broker_port, node_descriptor, space, position, rotation, dt
             )
             return drone
 
@@ -138,47 +132,89 @@ def main():
     # Parse Command Line Arguments
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file")
+    parser.add_argument(
+        "--mode", type=str, choices=["auto", "manual"], default="manual"
+    )
     args = parser.parse_args()
     pygame.init()
 
     screen = pygame.display.set_mode((600, 600))
-    pygame.display.set_caption("Single bot simulation")
     clock = pygame.time.Clock()
     draw_options = pymunk.pygame_util.DrawOptions(screen)
     logging.info("Simulation initialized")
 
     space = simulation.initialize_space((600, 600))
-    drone = ManualSimulatedDrone.from_config(space, (300, 300), 0, args.config)
+    fps = 50
+    dt = 1.0 / fps
+    drone = None
+    if args.mode == "manual":
+        pygame.display.set_caption("Manual bot simulation")
+        drone = ManualSimulatedDrone.from_config(space, (300, 300), 0, args.config, dt)
+        state = {"alive": True}
+        # Send the initial condition
+        drone.publish_all(json.dumps(state, separators=(",", ":")))
+        drone.start()
+        state = {"alive": True}
+        # Send the initial condition
+        drone.publish_all(json.dumps(state, separators=(",", ":")))
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+                ):
+                    state = {"alive": False}
+                    drone.publish_all(json.dumps(state, separators=(",", ":")))
+                    drone.stop()
+                    sys.exit(0)
+                    return
 
-    state = {"alive": True}
-    # Send the initial condition
-    drone.publish_all(json.dumps(state, separators=(",", ":")))
-    drone.start()
-    state = {"alive": True}
-    # Send the initial condition
-    drone.publish_all(json.dumps(state, separators=(",", ":")))
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or (
-                event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
-            ):
-                state = {"alive": False}
-                drone.publish_all(json.dumps(state, separators=(",", ":")))
-                drone.stop()
-                sys.exit(0)
-                return
+            drone.step(dt)
+            space.step(dt)
 
-        fps = 50
-        dt = 1.0 / fps
+            screen.fill((255, 255, 255))
+            space.debug_draw(draw_options)
 
-        drone.step(dt)
-        space.step(dt)
+            pygame.display.flip()
+            clock.tick(fps)
 
-        screen.fill((255, 255, 255))
-        space.debug_draw(draw_options)
+    elif args.mode == "auto":
+        pygame.display.set_caption("Auto bot simulation")
+        drone1 = AutoSimulatedDrone.from_config(space, (300, 200), 0, args.config, dt)
+        drone2 = AutoSimulatedDrone.from_config(
+            space, (300, 400), -math.pi, args.config, dt
+        )
 
-        pygame.display.flip()
-        clock.tick(fps)
+        state = {"alive": True}
+        # Send the initial condition
+        drone1.publish_all(json.dumps(state, separators=(",", ":")))
+        drone2.publish_all(json.dumps(state, separators=(",", ":")))
+        drone1.start()
+        drone2.start()
+
+        drone1.go_to_waypoint((500, 300))
+        drone2.go_to_waypoint((100, 300))
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+                ):
+                    state = {"alive": False}
+                    drone1.publish_all(json.dumps(state, separators=(",", ":")))
+                    drone2.publish_all(json.dumps(state, separators=(",", ":")))
+                    drone1.stop()
+                    drone2.stop()
+                    sys.exit(0)
+                    return
+
+            drone1.step(dt)
+            drone2.step(dt)
+            space.step(dt)
+
+            screen.fill((255, 255, 255))
+            space.debug_draw(draw_options)
+
+            pygame.display.flip()
+            clock.tick(fps)
 
 
 if __name__ == "__main__":
