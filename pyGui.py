@@ -62,6 +62,9 @@ class Gui:
         list_num_bots = list(range(self.num_bots))
         self.current_goal_pos = dict.fromkeys(list_num_bots, None)
 
+        self.guidedSymbols = ['X', 'O', '+', '*', '@', '#']
+        self.guidedColors = [RED, BLUE, TECH_GOLD, PINK, WHITE, DARK_GREEN]
+
 
 
 
@@ -161,6 +164,7 @@ class Gui:
             pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3)
         self.get_guided_goal_pos()
         self.draw_goal_pos()
+        self.draw_guided_key()
             #below can be used to include color coding
             #pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3, draw_top_right=True, draw_bottom_right=True)
             #pygame.draw.circle(self.screen, CYAN, (261 + x, 70 + y), 3, draw_top_left=True, draw_bottom_left=True)
@@ -187,12 +191,8 @@ class Gui:
 
     def draw_goal_pos(self):
         font = pygame.font.SysFont('Arial', 16)
-        symbols = ['X', 'O', '+', '*', '@', '#']
-        colors = [RED, BLUE, TECH_GOLD, PINK, WHITE, DARK_GREEN]
         xstart = self.guided_environment_range[0]
         ystart = self.guided_environment_range[1]
-
-
         i = -1
         j = 0
         for key, list_of_pos in self.current_goal_pos.items():
@@ -200,22 +200,28 @@ class Gui:
             if i > 6:
                 j +=1
                 i=0
-            text = font.render(symbols[i], True, colors[i + j])
+            text = font.render(self.guidedSymbols[i], True, self.guidedColors[i + j])
             w, h = text.get_rect().width, text.get_rect().height
             if list_of_pos is not None:
                 for pos in list_of_pos:
                     #print(pos)
                     self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
 
+    def draw_guided_key(self):
+        font = pygame.font.SysFont('Arial', 12)
+        self.screen.blit(font.render('Bot Key', True, BLACK), (544, 74))
+        i = -1
+        j = 0
+        for k in range(self.num_bots):
+            i += 1
+            if i > 6:
+                j+=1
+                i=0
+            self.screen.blit(font.render('Bot ' + str(k), True, BLACK), (544, 94+k*20))
+            self.screen.blit(font.render(self.guidedSymbols[i], True, self.guidedColors[i + j]), (584, 94+k*20))
 
-        #else:
-         #   pygame.draw.rect(self.screen, ic,(x,y,w,h),0,br)
 
-        #if (xstart < x < xend & ystart < y < yend):
-         #   text = font.render('X', True, RED)
-          #  w, h = text.get_rect().width, text.get_rect().height
-           # self.screen.blit(text, (x - w/2, y - h/2))
-           # self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
+            #self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
 
 
 
