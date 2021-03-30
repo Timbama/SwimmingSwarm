@@ -3,8 +3,7 @@ import json
 from argparse import ArgumentParser
 
 from swarm.overlord import Overlord
-from pixyController import pixyController
-from gpsCalculator import new_coordinate_relative_origin
+from pixyController import PixyController
 import pyGui
 
 # This is the temporary way of choosing where the guided bot goes
@@ -21,7 +20,7 @@ def main():
     parser.add_argument("configuration", type=str, help=".json configuration file")
     parser.add_argument(
         "-mode",
-        choices=["auto", "keyboard", "joystick"],
+        choices=["auto", "keyboard", "joystick", "guided"],
         help="control mode: auto, keyboard or joystick",
     )
     args = parser.parse_args()
@@ -49,6 +48,7 @@ def main():
 
         # Without GUI for now just for testing, will implement later
         overlord = GuidedOverlord.from_config(args.configuration, coords)
+        overlord.start()
 
 
 
@@ -156,7 +156,7 @@ class GuidedOverlord(Overlord):
         overlord = super().from_config(path)
         overlord.mode = "guided"
         overlord.gui = None
-        overlord.pixyController = pixyController()
+        overlord.pixyController = PixyController(1)
         with open(path, "r") as file:
             configuration = json.load(file)
             for bot in configuration["bots"]:
@@ -166,6 +166,8 @@ class GuidedOverlord(Overlord):
 
     def handle_message(self, link: str, msg: str):
         logging.info("Received %s message from: %s", msg, link)
+    
+        
 
         state = json.loads(msg.decode())
         if not state["alive"]:
@@ -175,6 +177,7 @@ class GuidedOverlord(Overlord):
         else:
             command = {}
             bots, count = self.pixyController.get_all_bot_positions()
+            print(count)
             for i in range(count):
                 bot_id = self.pixyController.identify_bot(bots[i].m_signature)
                 if (str(bot_id) in link): #bot_id will be the index of the bot in the COLOR_CODES dict in pixyController
@@ -184,16 +187,13 @@ class GuidedOverlord(Overlord):
                     # Compute bot's lat on lon based on position in pixyCam
                     bot = self.pixyController.get_bot_position(bots[i].m_signature)
                     dist_x, dist_y = self.pixyController.get_bot_position_units(bot)
-                    lat, lon = new_coordinate_relative_origin(self.coords["lat"], self.coords["lon"], dist_x, dist_y)
-                    command["coords"] = {
-                        "lat": lat, 
-                        "lon": lon
-                    }
-                    command["camera"] = {
+                    command["coords"] = TEST_GUIDED_COMMAND # this is where the bot will be told to go
+                    command["camera"] = {                   # this is the gps coords of the camera
                         "lat": self.coords["lat"],
                         "lon": self.coords["lon"]
                     }
-                    command["dist"] = {
+                    print(command["dist"])
+                    command["dist"] = { # this is where the pixyController sees the bot at
                         "x": dist_x,
                         "y": dist_y
                     }

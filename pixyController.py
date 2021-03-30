@@ -6,9 +6,9 @@ import math
 import argparse
 
 COLOR_CODES = {
-    "bot0": (1, 2),
+    "bot0": (1, 4),
     "bot1": (1, 3),
-    "bot2": (3, 4),
+    "bot2": (1, 2),
 }
 
 

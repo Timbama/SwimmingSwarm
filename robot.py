@@ -57,6 +57,14 @@ class ManualSitlDrone(DronekitSitlDrone):
 
 class GuidedDrone(Drone):
     def handle_start(self):
+        testLocation = {
+                lat: 80,
+                lon: 80
+            }
+            #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
+            droneLocation = self.vechile.get_location_metres(testLocation, -3, 2) # PixyCam up must be north
+            self.send_GPS(droneLocation.lat, droneLocation.lon)
+            print(self.location())
         pass
 
     def handle_stop(self):
@@ -75,8 +83,15 @@ class GuidedDrone(Drone):
             # This is telling the drone where it is based on the pixyCam info
             # self.send_GPS(command["coords"]["lat"], command["coords"]["lon"], 0)
             cameraLocation = LocationGlobal(float(command["camera"]["lat"]), float(command["camera"]["lon"]))
-            droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
+            testLocation = {
+                lat: 80,
+                lon: 80
+            }
+            #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
+            droneLocation = self.vechile.get_location_metres(testLocation, -3, 2) # PixyCam up must be north
             self.send_GPS(droneLocation.lat, droneLocation.lon)
+            print(self.location())
+            
 
             # Guided mode commands
             # this should ideally only execute once, should change that
@@ -134,7 +149,7 @@ def main():
     if args.sitl:
         bot = ManualSitlDrone.from_config(args.config, args.sitl_path)
     else:
-        bot = ManualDrone.from_config(args.config)
+        bot = GuidedDrone.from_config(args.config)
 
     # Wait for vehicle armable
     bot.wait_vehicle_armable()
