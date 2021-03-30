@@ -75,7 +75,7 @@ class GuidedDrone(DronekitDrone):
         Execute MQTT message
         """
         logging.info("Received %s message from: %s", msg, link)
-        if (msg.empty):
+        if (not msg):
             state = {
                 alive: True
             }
