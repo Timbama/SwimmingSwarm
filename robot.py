@@ -62,7 +62,7 @@ class GuidedDrone(Drone):
                 lon: 80
             }
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
-            droneLocation = self.vechile.get_location_metres(testLocation, -3, 2) # PixyCam up must be north
+            droneLocation = self.vechile.get_location_metres(testLocation, -3, 2)
             self.send_GPS(droneLocation.lat, droneLocation.lon)
             print(self.location())
         pass
