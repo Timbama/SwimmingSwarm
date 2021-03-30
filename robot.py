@@ -1,6 +1,7 @@
 import time
 import logging
 import json
+import dronekit
 from argparse import ArgumentParser
 
 from swarm.drone.dronekit import DronekitDrone, DronekitSitlDrone
@@ -61,7 +62,7 @@ class GuidedDrone(DronekitDrone):
             "lat": 80,
             "lon": 80
         }
-            #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
+        #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
         droneLocation = self.vechile.get_location_metres(testLocation, -3, 2)
         self.send_GPS(droneLocation.lat, droneLocation.lon)
         print(self.location())
@@ -90,13 +91,10 @@ class GuidedDrone(DronekitDrone):
             # This is telling the drone where it is based on the pixyCam info
             # self.send_GPS(command["coords"]["lat"], command["coords"]["lon"], 0)
             #cameraLocation = LocationGlobal(float(command["camera"]["lat"]), float(command["camera"]["lon"]))
-            testLocation = {
-                "lat": 80,
-                "lon": 80
-            }
+            testLocation = dronekit.LocationGlobal(-34, 56)
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
-            droneLocation = self.vehicle.get_location_metres(testLocation, -3, 2) # PixyCam up must be north
-            self.send_GPS(droneLocation.lat, droneLocation.lon)
+            #droneLocation = self.vehicle.get_location_metres(testLocation, -3, 2) # PixyCam up must be nort
+            self.send_GPS(testLocation.lat, testLocation.lon)
             print('here')
             print(self.location())
             
