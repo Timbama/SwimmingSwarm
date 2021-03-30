@@ -58,8 +58,8 @@ class ManualSitlDrone(DronekitSitlDrone):
 class GuidedDrone(DronekitDrone):
     def handle_start(self):
         testLocation = {
-            lat: 80,
-            lon: 80
+            "lat": 80,
+            "lon": 80
         }
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
         droneLocation = self.vechile.get_location_metres(testLocation, -3, 2)
@@ -77,7 +77,7 @@ class GuidedDrone(DronekitDrone):
         logging.info("Received %s message from: %s", msg, link)
         if (not msg):
             state = {
-                alive: True
+                "alive": True
             }
         else:
             state = json.loads(msg.decode())
@@ -90,8 +90,8 @@ class GuidedDrone(DronekitDrone):
             # self.send_GPS(command["coords"]["lat"], command["coords"]["lon"], 0)
             cameraLocation = LocationGlobal(float(command["camera"]["lat"]), float(command["camera"]["lon"]))
             testLocation = {
-                lat: 80,
-                lon: 80
+                "lat": 80,
+                "lon": 80
             }
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
             droneLocation = self.vechile.get_location_metres(testLocation, -3, 2) # PixyCam up must be north
