@@ -77,7 +77,8 @@ class GuidedDrone(DronekitDrone):
         logging.info("Received %s message from: %s", msg, link)
         if (not msg):
             state = {
-                "alive": True
+                "alive": True,
+                "command": "hi"
             }
         else:
             state = json.loads(msg.decode())
@@ -88,7 +89,7 @@ class GuidedDrone(DronekitDrone):
             
             # This is telling the drone where it is based on the pixyCam info
             # self.send_GPS(command["coords"]["lat"], command["coords"]["lon"], 0)
-            cameraLocation = LocationGlobal(float(command["camera"]["lat"]), float(command["camera"]["lon"]))
+            #cameraLocation = LocationGlobal(float(command["camera"]["lat"]), float(command["camera"]["lon"]))
             testLocation = {
                 "lat": 80,
                 "lon": 80
