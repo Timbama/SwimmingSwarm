@@ -94,7 +94,7 @@ class GuidedDrone(DronekitDrone):
             testLocation = dronekit.LocationGlobal(-34, 56)
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
             #droneLocation = self.vehicle.get_location_metres(testLocation, -3, 2) # PixyCam up must be nort
-            self.send_GPS(testLocation.lat, testLocation.lon)
+            self.send_GPS(testLocation.lat, testLocation.lon, 0)
             print('here')
             print(self.vehicle.location())
             
