@@ -58,13 +58,13 @@ class ManualSitlDrone(DronekitSitlDrone):
 class GuidedDrone(Drone):
     def handle_start(self):
         testLocation = {
-                lat: 80,
-                lon: 80
-            }
+            lat: 80,
+            lon: 80
+        }
             #droneLocation = self.vechile.get_location_metres(cameraLocation, -command["dist"]["y"], command["dist"]["x"]) # PixyCam up must be north
-            droneLocation = self.vechile.get_location_metres(testLocation, -3, 2)
-            self.send_GPS(droneLocation.lat, droneLocation.lon)
-            print(self.location())
+        droneLocation = self.vechile.get_location_metres(testLocation, -3, 2)
+        self.send_GPS(droneLocation.lat, droneLocation.lon)
+        print(self.location())
         pass
 
     def handle_stop(self):
