@@ -75,7 +75,13 @@ class GuidedDrone(DronekitDrone):
         Execute MQTT message
         """
         logging.info("Received %s message from: %s", msg, link)
-        state = json.loads(msg.decode())
+        if (msg.empty):
+            state = {
+                alive: True
+            }
+        else:
+            state = json.loads(msg.decode())
+            
         if state["alive"]:
             command = state["command"]
             logging.info("New command %s", command)
