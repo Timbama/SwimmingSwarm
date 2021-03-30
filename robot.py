@@ -55,7 +55,7 @@ class ManualSitlDrone(DronekitSitlDrone):
         self.publish_all(json.dumps(state, separators=(",", ":")))
         logging.info("Published to %s message: %s", link, state)
 
-class GuidedDrone(Drone):
+class GuidedDrone(DronekitDrone):
     def handle_start(self):
         testLocation = {
             lat: 80,
