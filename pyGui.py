@@ -137,16 +137,35 @@ class Gui:
         pygame.draw.rect(self.screen, DARK_GREY, [98, 68, 604, 444])
         pygame.draw.rect(self.screen, WHITE, [100, 70, 600, 440])
         pygame.draw.rect(self.screen, DARK_GREY, [98, 350, 604, 2])
-        self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
+        left = 101
+        top = 353
+        self.screen.blit(font.render('Select Bot', True, BLACK), (left, top))
+        buttonHeight = font.size('Select Bot')[1]
+        backRectHeight = buttonHeight + 2
+        vertical = buttonHeight + 6
+        botButtonWidth = 60
+        j = 0
+        runningHeight = top + vertical
         for i in range(len(self.bot_list)):
             if self.guidedState == self.bot_list[i]:
                 color = GREEN
             else: color = GREY
-            pygame.draw.rect(self.screen, BLACK, [101, 375 + 24 * i, 62, 20], border_radius=2)
-            self.button('Bot ' + str(i), 102, 376 + 24 * i, 60, 18, color, DARK_GREY, font, self.toggle_guided_state, i, br=2)
-            save_i = i + 1
-        pygame.draw.rect(self.screen, BLACK, [101, 375 + 24 * save_i, 117, 20], border_radius=2)
-        self.button('Clear Selection', 102, 376 + 24 * save_i, 115, 18, GREY, DARK_GREY, font, self.toggle_guided_state, -1,
+            if (runningHeight + backRectHeight > 510):
+                #the 510 is white rectangle height. too lazy not to hard code sorry
+                runningHeight = top+vertical
+                j += 1
+            pygame.draw.rect(self.screen, BLACK, [left+(j*(botButtonWidth+6)), runningHeight, botButtonWidth+2, backRectHeight], border_radius=2)
+            self.button('Bot ' + str(i), left+1+(j*(botButtonWidth+6)), runningHeight+1, botButtonWidth, buttonHeight, color, DARK_GREY, font, self.toggle_guided_state, i, br=2)
+            #save_i = i + 1
+            runningHeight += vertical
+        #save_i += 1
+        if (runningHeight + backRectHeight > 510):
+            # the 510 is white rectangle height. too lazy not to hard code sorry
+            runningHeight = top + vertical
+            j += 1
+        clearWidth = font.size('Clear Selection')[0]+6
+        pygame.draw.rect(self.screen, BLACK, [left+(j*(botButtonWidth+6)), runningHeight, clearWidth+2, backRectHeight], border_radius=2)
+        self.button('Clear Selection', left+1+(j*(botButtonWidth+6)), runningHeight+1, clearWidth, buttonHeight, GREY, DARK_GREY, font, self.toggle_guided_state, -1,
                     br=2)
 
     def draw_bot_environment(self):
@@ -225,10 +244,10 @@ class Gui:
         j = 0
         for key, list_of_pos in self.current_goal_pos.items():
             i += 1
-            if i > len(self.guidedSymbols):
+            if i >= len(self.guidedSymbols):
                 j +=1
                 i=0
-            text = font.render(self.guidedSymbols[i], True, self.guidedColors[i + j])
+            text = font.render(self.guidedSymbols[i], True, self.guidedColors[(i + j) % len(self.guidedColors)])
             w, h = text.get_rect().width, text.get_rect().height
             if list_of_pos is not None:
                 for pos in list_of_pos:
@@ -243,11 +262,15 @@ class Gui:
         j = 0
         for k in range(self.num_bots):
             i += 1
-            if i > 6:
+            if i >= 6:
                 j+=1
                 i=0
             self.screen.blit(font.render('Bot ' + str(k), True, BLACK), (544, 94+k*20))
-            self.screen.blit(font.render(self.guidedSymbols[i], True, self.guidedColors[i + j]), (584, 94+k*20))
+            color = self.guidedColors[(i + j) % len(self.guidedColors)]
+            text = self.guidedSymbols[i]
+            if (color is WHITE):
+                pygame.draw.rect(self.screen, BLACK, [584, 94+k*20, font.size(text)[0], font.size(text)[1]])
+            self.screen.blit(font.render(text, True, color), (584, 94+k*20))
 
 
             #self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
