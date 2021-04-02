@@ -23,7 +23,7 @@ def main():
         #fake list of bots
         #signature, x coord, y coord
         bots_first_part = []
-        for i in range(5):
+        for i in range(7):
             bots_first_part.append([i, (i+1)*30, (i+2)*30])
         bots = bots_first_part
 

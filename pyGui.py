@@ -57,6 +57,8 @@ class Gui:
         self.guidedState = None
         self.guided_environment_range = (None, None, None, None)
 
+        self.remove_command = False
+
         #need to make this a dictionary with the key being bots
         #bots are mutable, key must be immutable
         list_num_bots = list(range(self.num_bots))
@@ -131,12 +133,14 @@ class Gui:
         self.screen.blit(myfont.render('Pitch', True, BLACK),(665,110))
         self.screen.blit(myfont.render('Roll', True, BLACK),(380,30))
 
-    #this should probably get renamed
-    def draw_bot_list(self):
-        font = pygame.font.SysFont('Arial', 16)
+    def draw_guided_screen(self):
         pygame.draw.rect(self.screen, DARK_GREY, [98, 68, 604, 444])
         pygame.draw.rect(self.screen, WHITE, [100, 70, 600, 440])
         pygame.draw.rect(self.screen, DARK_GREY, [98, 350, 604, 2])
+
+    #this should probably get renamed
+    def draw_bot_list_buttons(self):
+        font = pygame.font.SysFont('Arial', 16)
         left = 101
         top = 353
         self.screen.blit(font.render('Select Bot', True, BLACK), (left, top))
@@ -167,6 +171,7 @@ class Gui:
         pygame.draw.rect(self.screen, BLACK, [left+(j*(botButtonWidth+6)), runningHeight, clearWidth+2, backRectHeight], border_radius=2)
         self.button('Clear Selection', left+1+(j*(botButtonWidth+6)), runningHeight+1, clearWidth, buttonHeight, GREY, DARK_GREY, font, self.toggle_guided_state, -1,
                     br=2)
+        return left+(j*(botButtonWidth+6))+clearWidth
 
     def draw_bot_environment(self):
         pygame.draw.rect(self.screen, LIGHT_BLUE, [261, 70, 280, 280])
@@ -177,15 +182,14 @@ class Gui:
             if self.guidedState == bot:
                 pygame.draw.circle(self.screen, RED, (261 + x, 70 + y), 4)
             pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3)
-        self.get_guided_goal_pos()
-        self.draw_goal_pos()
-        self.draw_guided_key()
+        self.get_guided_bot_commands()
+        self.draw_guided_bot_commands()
+        self.draw_guided_legend()
             #below can be used to include color coding
             #pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3, draw_top_right=True, draw_bottom_right=True)
             #pygame.draw.circle(self.screen, CYAN, (261 + x, 70 + y), 3, draw_top_left=True, draw_bottom_left=True)
 
-    def draw_goal_pos_text(self):
-        left = 401
+    def draw_guided_bot_commands_text(self, left):
         top = 353
         font = pygame.font.SysFont('Arial', 16)
         vertical = font.size('Bot Commands')[1] + 6
@@ -197,13 +201,12 @@ class Gui:
                 #font.size(botID) gets (width, height) of a text in this font
                 botIDwidth = font.size(botID)[0]
                 self.screen.blit(font.render(botID, True, BLACK), (left, top+(vertical*(i))))
-
                 pos = str(self.current_goal_pos[bot])
                 pos = pos[1:-1]
                 posSize = font.size(str(pos))[0]
                 pygame.draw.rect(self.screen, WHITE, [left+botIDwidth, top+(vertical*i), 700-left-botIDwidth, vertical])
                 if (posSize + left + botIDwidth <= 700):
-                    # the 700 above comes from the white rectangle's dimensions in self.draw_bot_list, but I'm too lazy to not hard code it sorry
+                    # the 700 above comes from the white rectangle's dimensions in self.draw_bot_list_buttons, but I'm too lazy to not hard code it sorry
                     self.screen.blit(font.render(pos, True, BLACK), (left+botIDwidth, top+(vertical*(i))))
                 else:
                     self.screen.blit(font.render('has a lot to do.', True, BLACK),
@@ -212,11 +215,11 @@ class Gui:
                 text = 'Bot ' + str(bot) + ' has no commands.'
                 self.screen.blit(font.render(text, True, BLACK), (left, top+(vertical*(i))))
             i += 1
+        endRight = font.size('Bot Commands')[0] + left
+        return endRight
 
 
-
-
-    def get_guided_goal_pos(self):
+    def get_guided_bot_commands(self):
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         xstart = self.guided_environment_range[0]
@@ -236,7 +239,7 @@ class Gui:
                     #self.current_goal_pos[self.bot_list.index(self.guidedState)].append((x,y))
                     #print(self.current_goal_pos)
 
-    def draw_goal_pos(self):
+    def draw_guided_bot_commands(self):
         font = pygame.font.SysFont('Arial', 16)
         xstart = self.guided_environment_range[0]
         ystart = self.guided_environment_range[1]
@@ -255,9 +258,9 @@ class Gui:
                     self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
 
 
-    def draw_guided_key(self):
+    def draw_guided_legend(self):
         font = pygame.font.SysFont('Arial', 12)
-        self.screen.blit(font.render('Bot Key', True, BLACK), (544, 74))
+        self.screen.blit(font.render('Bot Legend', True, BLACK), (544, 74))
         i = -1
         j = 0
         for k in range(self.num_bots):
@@ -275,7 +278,25 @@ class Gui:
 
             #self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
 
+    def draw_remove_goal_pos_button(self, left, top, font):
+        buttonWidth, buttonHeight = font.size('Remove a Command')
+        pygame.draw.rect(self.screen, BLACK,
+                         [left, top, buttonWidth + 4, buttonHeight+2],
+                         border_radius=2)
+        if (self.remove_command):
+            color = GREEN
+            buttonWidth1, buttonHeight1 = font.size("Stop")
+            pygame.draw.rect(self.screen, BLACK,
+                             [left+buttonWidth+11, top, buttonWidth1 + 4, buttonHeight1 + 2],
+                             border_radius=2)
+            self.button('Stop', left+buttonWidth+12, top+1, buttonWidth1+2,
+                        buttonHeight1, GREY, DARK_GREY, font, self.set_remove_command, False, br=2)
+        else: color = GREY
+        self.button('Remove a Command', left+1, top+1, buttonWidth+2,
+                    buttonHeight, color, DARK_GREY, font, self.set_remove_command, True, br=2)
 
+    def set_remove_command(self, bool):
+        self.remove_command = bool
 
     def draw_menubar(self):
         menuFont = pygame.font.SysFont('Arial', 12)
@@ -372,14 +393,16 @@ class Gui:
         self.draw_menubar()
 
         if self.tabState == TABS[len(self.bot_list)]:
-            self.draw_bot_list()
+            self.draw_guided_screen()
+            endButtons = self.draw_bot_list_buttons()
             self.draw_bot_environment()
-            self.draw_goal_pos_text()
+            textEndRight = self.draw_guided_bot_commands_text(endButtons + 20)
+            self.draw_remove_goal_pos_button(textEndRight + 10, 353, pygame.font.SysFont('Arial', 16))
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP:
                     pos = event.pos
                     #print(pos)
-                    self.get_guided_goal_pos()
+                    self.get_guided_bot_commands()
                 elif event.type == pygame.QUIT:
                     quit()
 
@@ -422,6 +445,8 @@ class Gui:
             self.guidedState = None
         else:
             self.guidedState = self.bot_list[idx]
+
+
 
     
     def has_quit(self):
