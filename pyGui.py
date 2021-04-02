@@ -66,9 +66,6 @@ class Gui:
         self.guidedColors = [RED, BLUE, TECH_GOLD, PINK, WHITE, DARK_GREEN]
 
 
-
-
-
         # Used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
 
@@ -152,7 +149,6 @@ class Gui:
         self.button('Clear Selection', 102, 376 + 24 * save_i, 115, 18, GREY, DARK_GREY, font, self.toggle_guided_state, -1,
                     br=2)
 
-
     def draw_bot_environment(self):
         pygame.draw.rect(self.screen, LIGHT_BLUE, [261, 70, 280, 280])
         self.guided_environment_range = (261, 70, 280, 280)
@@ -169,6 +165,38 @@ class Gui:
             #pygame.draw.circle(self.screen, BLACK, (261 + x, 70 + y), 3, draw_top_right=True, draw_bottom_right=True)
             #pygame.draw.circle(self.screen, CYAN, (261 + x, 70 + y), 3, draw_top_left=True, draw_bottom_left=True)
 
+    def draw_goal_pos_text(self):
+        left = 401
+        top = 353
+        font = pygame.font.SysFont('Arial', 16)
+        vertical = font.size('Bot Commands')[1] + 6
+        self.screen.blit(font.render('Bot Commands', True, BLACK), (left, top))
+        i = 1
+        for bot in self.current_goal_pos:
+            if self.current_goal_pos[bot]:
+                botID = 'Bot ' + str(bot) + ': '
+                #font.size(botID) gets (width, height) of a text in this font
+                botIDwidth = font.size(botID)[0]
+                self.screen.blit(font.render(botID, True, BLACK), (left, top+(vertical*(i))))
+
+                pos = str(self.current_goal_pos[bot])
+                pos = pos[1:-1]
+                posSize = font.size(str(pos))[0]
+                pygame.draw.rect(self.screen, WHITE, [left+botIDwidth, top+(vertical*i), 700-left-botIDwidth, vertical])
+                if (posSize + left + botIDwidth <= 700):
+                    # the 700 above comes from the white rectangle's dimensions in self.draw_bot_list, but I'm too lazy to not hard code it sorry
+                    self.screen.blit(font.render(pos, True, BLACK), (left+botIDwidth, top+(vertical*(i))))
+                else:
+                    self.screen.blit(font.render('has a lot to do.', True, BLACK),
+                                     (left + botIDwidth, top + vertical * (i)))
+            else:
+                text = 'Bot ' + str(bot) + ' has no commands.'
+                self.screen.blit(font.render(text, True, BLACK), (left, top+(vertical*(i))))
+            i += 1
+
+
+
+
     def get_guided_goal_pos(self):
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
@@ -177,15 +205,15 @@ class Gui:
         ystart = self.guided_environment_range[1]
         yend = self.guided_environment_range[1] + self.guided_environment_range[3]
         if self.guidedState is not None:
-            stateNum = self.bot_list.index(self.guidedState)
+            botNum = self.bot_list.index(self.guidedState)
             if xend > mouse[0] > xstart and yend > mouse[1] > ystart:
                 if click[0] == 1:
                     x = mouse[0] - xstart
                     y = mouse[1] - ystart
-                    if self.current_goal_pos[stateNum] is None:
-                        self.current_goal_pos[stateNum] = [(x,y)]
+                    if self.current_goal_pos[botNum] is None:
+                        self.current_goal_pos[botNum] = [(x,y)]
                     else:
-                        self.current_goal_pos[stateNum].append((x,y))
+                        self.current_goal_pos[botNum].append((x,y))
                     #self.current_goal_pos[self.bot_list.index(self.guidedState)].append((x,y))
                     #print(self.current_goal_pos)
 
@@ -197,7 +225,7 @@ class Gui:
         j = 0
         for key, list_of_pos in self.current_goal_pos.items():
             i += 1
-            if i > 6:
+            if i > len(self.guidedSymbols):
                 j +=1
                 i=0
             text = font.render(self.guidedSymbols[i], True, self.guidedColors[i + j])
@@ -206,6 +234,7 @@ class Gui:
                 for pos in list_of_pos:
                     #print(pos)
                     self.screen.blit(text, (pos[0] + xstart - w / 2, pos[1] + ystart - h / 2))
+
 
     def draw_guided_key(self):
         font = pygame.font.SysFont('Arial', 12)
@@ -322,6 +351,7 @@ class Gui:
         if self.tabState == TABS[len(self.bot_list)]:
             self.draw_bot_list()
             self.draw_bot_environment()
+            self.draw_goal_pos_text()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP:
                     pos = event.pos

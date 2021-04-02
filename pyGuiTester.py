@@ -2,7 +2,7 @@ import logging
 import json
 from argparse import ArgumentParser
 
-from swarm.overlord import Overlord
+#from swarm.overlord import Overlord
 
 import pyGui
 
