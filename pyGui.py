@@ -216,7 +216,7 @@ class Gui:
                 self.screen.blit(font.render(text, True, BLACK), (left, top+(vertical*(i))))
             i += 1
         endRight = font.size('Bot Commands')[0] + left
-        return endRight
+        return endRight, vertical
 
 
     def get_guided_bot_commands(self):
@@ -278,7 +278,7 @@ class Gui:
 
             #self.screen.blit(font.render('Select Bot', True, BLACK), (101, 353))
 
-    def draw_remove_goal_pos_button(self, left, top, font):
+    def draw_remove_command_button(self, left, top, font):
         buttonWidth, buttonHeight = font.size('Remove a Command')
         pygame.draw.rect(self.screen, BLACK,
                          [left, top, buttonWidth + 4, buttonHeight+2],
@@ -297,6 +297,51 @@ class Gui:
 
     def set_remove_command(self, bool):
         self.remove_command = bool
+
+    def get_remove_command(self, left, vertical, font):
+        #vertical: how many pixels between each row of bot commands
+        #left: left side of list of bots, including "Bot X: "
+        top = 353
+        if (self.remove_command):
+            mouse = pygame.mouse.get_pos()
+            click = pygame.mouse.get_pressed()
+            #might need specific starts and ends for each list?
+            #get y first to get what bot we're looking at, then get x to see if we actually clicked something and what it was
+            #xstart = left side of bot command list
+            #xend = end of white space
+            #ystart = top of bot command list
+            #yend = end of white space
+            self.num_bots
+            if click[0] == 1:
+                x = mouse[0]
+                y = mouse[1]
+                if (top + vertical < y < top + vertical*(self.num_bots+1)):
+                    botNum = int((y - top - vertical) / vertical)
+                    print(botNum)
+                    botIDwidth = font.size('Bot ' + str(botNum) + ': ')[0]
+                #if left + 'Bot X: '.size < mouse[0] < left + 'Bot X: '.size + str(botList).size
+                    pos = str(self.current_goal_pos[botNum])
+                    pos = pos[1:-1]
+                    posSize = font.size(str(pos))[0]
+                    if (left + botIDwidth < x < left + botIDwidth + posSize):
+                        print('yes')
+                        #get the x position of the list
+                        xcopy = x
+                        xcopy = xcopy - left - botIDwidth
+                        for loc in self.current_goal_pos[botNum]:
+                            locWidth = font.size(str(loc))[0]
+                            if (0 < xcopy < locWidth):
+                                toRemove = loc
+                                xcopy -= locWidth
+                            else:
+                                xcopy -= locWidth
+                        print(toRemove)
+                            #if (xcopy
+                        #get the size of the first thing, is that where the x is?
+                        #get the size of the second thing, etc....
+            
+
+
 
     def draw_menubar(self):
         menuFont = pygame.font.SysFont('Arial', 12)
@@ -318,8 +363,6 @@ class Gui:
         else: self.button('Guided', 2 + 62 * (final_i + 1), 2, 60, 18, unselected_color, DARK_GREY, menuFont,
                         self.toggle_tab_state, len(self.bot_list))
         self.button('Quit', 738, 2, 60, 18, GREY, DARK_GREY, menuFont, self.stop)
-
-
 
     def draw_selected_bot(self):
         font = pygame.font.SysFont('Arial', 16)
@@ -396,13 +439,16 @@ class Gui:
             self.draw_guided_screen()
             endButtons = self.draw_bot_list_buttons()
             self.draw_bot_environment()
-            textEndRight = self.draw_guided_bot_commands_text(endButtons + 20)
-            self.draw_remove_goal_pos_button(textEndRight + 10, 353, pygame.font.SysFont('Arial', 16))
+            textEndRight, vertical = self.draw_guided_bot_commands_text(endButtons + 20)
+            self.draw_remove_command_button(textEndRight + 10, 353, pygame.font.SysFont('Arial', 16))
+            #self.get_guided_bot_commands()
+            self.get_remove_command(endButtons + 20, vertical, pygame.font.SysFont('Arial', 16))
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP:
                     pos = event.pos
                     #print(pos)
-                    self.get_guided_bot_commands()
+                    #self.get_guided_bot_commands()
+                    #self.get_remove_command(endButtons + 20, vertical, pygame.font.SysFont('Arial', 16))
                 elif event.type == pygame.QUIT:
                     quit()
 
