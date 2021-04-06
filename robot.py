@@ -127,7 +127,7 @@ class GuidedDrone(DronekitDrone):
             ignore,                 #Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum). All other fields must be provided.
             0,                      #GPS time (milliseconds from start of GPS week)
             0,                      #GPS week number
-            gps_fix_type["3d_fix"], #0-1: no fix, 2: 2D fix, 3: 3D fix. 4: 3D with DGPS. 5: 3D with RTK
+            gps_fix_type["2d_fix"], #0-1: no fix, 2: 2D fix, 3: 3D fix. 4: 3D with DGPS. 5: 3D with RTK
             int(lat * (10**7)),     #Latitude (WGS84), in degrees * 1E7
             int(lon * (10**7)),     #Longitude (WGS84), in degrees * 1E7
             alt,                    #Altitude (AMSL, not WGS84), in m (positive for up)
