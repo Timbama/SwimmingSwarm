@@ -317,14 +317,14 @@ class Gui:
                 y = mouse[1]
                 if (top + vertical < y < top + vertical*(self.num_bots+1)):
                     botNum = int((y - top - vertical) / vertical)
-                    print(botNum)
+                    #print(botNum)
                     botIDwidth = font.size('Bot ' + str(botNum) + ': ')[0]
                 #if left + 'Bot X: '.size < mouse[0] < left + 'Bot X: '.size + str(botList).size
                     pos = str(self.current_goal_pos[botNum])
                     pos = pos[1:-1]
                     posSize = font.size(str(pos))[0]
                     if (left + botIDwidth < x < left + botIDwidth + posSize):
-                        print('yes')
+                        #print('yes')
                         #get the x position of the list
                         xcopy = x
                         xcopy = xcopy - left - botIDwidth
@@ -336,10 +336,11 @@ class Gui:
                             else:
                                 xcopy -= locWidth
                         print(toRemove)
+                        self.current_goal_pos[botNum].remove(toRemove)
                             #if (xcopy
                         #get the size of the first thing, is that where the x is?
                         #get the size of the second thing, etc....
-            
+
 
 
 
@@ -443,8 +444,12 @@ class Gui:
             self.draw_remove_command_button(textEndRight + 10, 353, pygame.font.SysFont('Arial', 16))
             #self.get_guided_bot_commands()
             self.get_remove_command(endButtons + 20, vertical, pygame.font.SysFont('Arial', 16))
+
             for event in pygame.event.get():
+                #print(event)
                 if event.type == pygame.MOUSEBUTTONUP:
+                    #for some reason, the only events in pygame.event.get() are mouse movements, window leave, and window enter
+                    print('hi')
                     pos = event.pos
                     #print(pos)
                     #self.get_guided_bot_commands()
