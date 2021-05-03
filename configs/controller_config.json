@@ -1,0 +1,54 @@
+{
+    "broker": {
+        "ip": "localhost",
+        "port": 1883
+    },
+    "node": {
+        "end_point": "controller",
+        "links": {
+            "/input0": {
+                "links": {},
+                "type": "STREAM"
+            },
+            "/input1": {
+                "links": {},
+                "type": "STREAM"
+            },
+            "/input2": {
+                "links": {},
+                "type": "STREAM"
+            }
+        },
+        "requests": [
+            {
+                "link": "robot0/state",
+                "type": "STREAM",
+                "required": false
+            },
+            {
+                "link": "robot1/state",
+                "type": "STREAM",
+                "required": false
+            },
+            {
+                "link": "robot2/state",
+                "type": "STREAM",
+                "required": false
+            }
+        ]
+    },
+    "bots": [
+        {
+            "sub_link": "robot0/state",
+            "pub_link": "controller/input0"
+        },
+        {
+            "sub_link": "robot1/state",
+            "pub_link": "controller/input1"
+        },
+        {
+            "sub_link": "robot2/state",
+            "pub_link": "controller/input2"
+        }
+    ]
+}

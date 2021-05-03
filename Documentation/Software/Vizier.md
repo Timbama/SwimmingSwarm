@@ -48,7 +48,7 @@ This is the JSON description file for the robot node:
 `controller` is the name of the other node that it is connecting to and it can request the data labeled `input`.
 
 # Syntax
-*All of the sample code shown here is pulled directly from the [robot.py][1] file*
+*All of the sample code shown here is pulled directly from the [robot.py](../../robot.py) file*
 
 First, you need to open the JSON file to get the information from it.
 
@@ -98,4 +98,3 @@ Finally, when we are done we need to close the connection.
 node.stop()
 ```
 [1]: https://github.com/robotarium/vizier
-[2]: https://github.com/tom-hightower/SwimmingSwarm/blob/849e48bec4546f2969349d917c4d93bd74bb12cf/robot.py
