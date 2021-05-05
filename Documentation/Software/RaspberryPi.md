@@ -1,5 +1,5 @@
 # Installing the Operating System
-You can either download a base install of [Raspbian][1] or copy a disk image from one of the other working raspberry pi's.
+You can either download a base install of [Raspberry Pi OS][1] (Lite is fine) or copy a disk image from one of the other working raspberry pi's.
 To copy the disk image put the sd card in a linux computer, unmount the partitions, and run 
 
 ```
@@ -45,7 +45,7 @@ to enable a temporary swap file as shown [here][7]
 Then build Limesuite by following [this guide][8].
 
 
-[1]: https://www.raspberrypi.org/downloads/raspbian/
+[1]: https://www.raspberrypi.org/software/operating-systems/
 [2]: https://etcher.io/
 [3]: ./Vizier.md#installation
 [4]: https://github.com/pothosware/SoapySDR/wiki/BuildGuide
